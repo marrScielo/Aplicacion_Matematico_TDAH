@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MathADHD - 16 Juegos Modulares</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+
+        :root { --bg: #F8FAFC; --primary: #3B82F6; --success: #10B981; --warning: #F59E0B; --danger: #EF4444; --purple: #8B5CF6; }
+        * { box-sizing: border-box; touch-action: none; font-family: 'Nunito', sans-serif; user-select: none; }
+        body { background: var(--bg); margin: 0; display: flex; justify-content: center; height: 100vh; overflow: hidden; color: #1E293B; }
+        .app { width: 100%; max-width: 600px; height: 100%; background: #FFF; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        
+        /* Cabeceras */
+        .top-bar { background: var(--primary); color: #FFF; padding: 15px; display: flex; justify-content: space-between; font-family: 'Fredoka One'; font-size: 1.2rem; z-index: 10;}
+        .btn-back { background: rgba(255,255,255,0.2); border: none; color: #FFF; padding: 5px 15px; border-radius: 10px; font-family: 'Fredoka One'; cursor: pointer; }
+        
+        /* Pantallas */
+        .screen { display: none; flex: 1; padding: 20px; flex-direction: column; align-items: center; overflow-y: auto; }
+        .screen.active { display: flex; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1, h2 { font-family: 'Fredoka One'; text-align: center; width: 100%; margin-top: 0;}
+        .instruction { background: #F1F5F9; padding: 15px; border-radius: 15px; font-size: 1.2rem; width: 100%; text-align: center; margin-bottom: 20px; font-weight: 900;}
+
+        /* Menús */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
+        .btn-menu { border: 4px solid; border-radius: 15px; padding: 20px 10px; font-size: 1.1rem; font-family: 'Fredoka One'; cursor: pointer; box-shadow: 0 5px 0; background: #FFF; display: flex; flex-direction: column; align-items: center; transition: 0.1s;}
+        .btn-menu:active { transform: translateY(5px); box-shadow: 0 0 0 !important; }
+        
+        .c-add { border-color: var(--success); color: var(--success); box-shadow: 0 5px 0 #059669; }
+        .c-sub { border-color: var(--danger); color: var(--danger); box-shadow: 0 5px 0 #DC2626; }
+        .c-mul { border-color: var(--warning); color: var(--warning); box-shadow: 0 5px 0 #D97706; }
+        .c-div { border-color: var(--purple); color: var(--purple); box-shadow: 0 5px 0 #6D28D9; }
+
+        /* Motor de Juego */
+        .game-area { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; min-height: 80px; padding: 10px; border-radius: 15px; }
+        .area-top { background: #FFF; margin-bottom: 20px; }
+        .area-bot { background: #F8FAFC; border: 2px solid #E2E8F0; }
+
+        /* Arrastrables y Objetivos */
+        .drag-item { width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 2rem; cursor: grab; z-index: 100; transition: transform 0.1s; }
+        .drag-item.dragging { position: absolute; transform: scale(1.3); z-index: 999; }
+        .click-item { width: 50px; height: 50px; font-size: 2.5rem; cursor: pointer; transition: transform 0.2s; text-align: center;}
+
+        /* Clases Dinámicas de Contenedores */
+        .target { display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 2px; padding: 5px; transition: 0.2s; }
+        .t-caja { width: 120px; height: 120px; border: 4px dashed #94A3B8; border-radius: 15px; background: #F1F5F9; }
+        .t-pecera { width: 130px; height: 130px; border: 4px solid #3B82F6; border-radius: 50%; background: #DBEAFE; }
+        .t-mochila { width: 120px; height: 140px; border: 4px solid #F59E0B; border-radius: 30px 30px 10px 10px; background: #FEF3C7; }
+        .t-cerdito { width: 140px; height: 140px; border: 4px solid #DB2777; border-radius: 50% 50% 40% 40%; background: #FBCFE8; font-size: 3rem; }
+        .t-monstruo { border: none; background: transparent; font-size: 5rem; width: 100px; height: 100px;}
+        .t-nave { border: none; background: transparent; font-size: 5rem; width: 100px; height: 100px;}
+        .t-regalo { width: 80px; height: 80px; border: 4px solid #EF4444; border-radius: 10px; background: #FECACA; }
+        .t-nido { width: 90px; height: 60px; border: 4px solid #92400E; border-radius: 0 0 50px 50px; background: #FEF3C7; margin-top: 20px;}
+        .t-plato { width: 90px; height: 90px; border: 4px solid #94A3B8; border-radius: 50%; background: #FFF; }
+        .t-cofre { width: 90px; height: 80px; border: 4px solid #713F12; border-radius: 10px 10px 0 0; background: #A16207; }
+        .t-perro { border: none; background: transparent; font-size: 3rem; width: 60px; height: 60px;}
+        .t-canasta { width: 80px; height: 80px; border: 4px solid #EA580C; border-top: none; border-radius: 0 0 20px 20px; background: transparent; }
+
+        /* Cuadrícula */
+        .grid-machine { display: grid; gap: 5px; margin: 0 auto; background: #333; padding: 10px; border-radius: 10px; }
+        .grid-cell { width: 30px; height: 30px; background: var(--warning); border-radius: 5px; }
+
+        /* Botones Acción */
+        .btn-check { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 20px; font-size: 1.2rem; font-family: 'Fredoka One'; cursor: pointer; width: 100%; box-shadow: 0 5px 0 #2563EB; margin-top: auto; }
+        .btn-check:active { transform: translateY(5px); box-shadow: 0 0 0; }
+        .btn-next { background: var(--success); color: white; border: none; padding: 15px 30px; border-radius: 20px; font-size: 1.2rem; font-family: 'Fredoka One'; cursor: pointer; width: 100%; box-shadow: 0 5px 0 #059669; margin-top: 10px; display: none; }
+        
+        .feedback { font-size: 1.2rem; font-weight: bold; text-align: center; margin-top: 15px; min-height: 30px; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="top-bar">
+        <button class="btn-back" id="btn-back" style="display:none;" onclick="goBack()">◀ Menú</button>
+        <span>MathADHD</span>
+        <span>⭐ <span id="score">0</span></span>
+    </div>
+
+    <div id="screen-main" class="screen active">
+        <h1 style="color:var(--primary); font-size:2.2rem;">Operaciones</h1>
+        <div class="grid">
+            <button class="btn-menu c-add" onclick="showMenu('add')"><span style="font-size:3rem;">➕</span>Sumar</button>
+            <button class="btn-menu c-sub" onclick="showMenu('sub')"><span style="font-size:3rem;">➖</span>Restar</button>
+            <button class="btn-menu c-mul" onclick="showMenu('mul')"><span style="font-size:3rem;">✖️</span>Multiplicar</button>
+            <button class="btn-menu c-div" onclick="showMenu('div')"><span style="font-size:3rem;">➗</span>Dividir</button>
+        </div>
+    </div>
+
+    <div id="screen-sub" class="screen">
+        <h2 id="sub-title">Juegos</h2>
+        <div class="grid" id="sub-list" style="grid-template-columns: 1fr;"></div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="instruction" id="game-instr"></div>
+        <div id="game-top" class="game-area area-top"></div>
+        <div id="game-bot" class="game-area area-bot"></div>
+        <div id="game-feedback" class="feedback"></div>
+        <button class="btn-check" id="btn-check" onclick="checkCurrentGame()">Comprobar</button>
+        <button class="btn-next" id="btn-next" onclick="restartCurrentGame()">¡Siguiente Reto!</button>
+    </div>
+</div>
+
+<script>
+    let points = 0;
+    let currentInitFunc = null; 
+    let checkLogic = null;
+    let gameState = {};
+
+    // --- BASE DE DATOS DE JUEGOS (16 Funcionales) ---
+    const DB = {
+        'add': { title: 'Sumas', color: 'c-add', games: [
+            { n: '📦 Caja Mágica', f: () => initDrag('Mete', '🍎', 1, 't-caja', false) },
+            { n: '🐟 Pecera', f: () => initDrag('Sumerge', '🐟', 1, 't-pecera', false) },
+            { n: '🎒 Mochila', f: () => initDrag('Guarda', '✏️', 1, 't-mochila', false) },
+            { n: '🐷 Alcancía', f: () => initDrag('Ahorra', '🪙', 1, 't-cerdito', true) }
+        ]},
+        'sub': { title: 'Restas', color: 'c-sub', games: [
+            { n: '👹 Monstruo', f: () => initDragSub('Dale', '🍪', 't-monstruo') },
+            { n: '🛸 Nave Espacial', f: () => initDragSub('Sube', '👽', 't-nave') },
+            { n: '🎈 Pinchando Globos', f: () => initDestroy('Explota', '🎈') },
+            { n: '🧹 Borrador Mágico', f: () => initDestroy('Borra', '🟤') }
+        ]},
+        'mul': { title: 'Multiplicaciones', color: 'c-mul', games: [
+            { n: '⚡ Clonador', f: initCloner },
+            { n: '🏭 Fábrica', f: initGrid },
+            { n: '🎁 Regalos', f: () => initDragMul('Pon', '🎀', 't-regalo') },
+            { n: '🥚 Nidos', f: () => initDragMul('Cuida', '🥚', 't-nido') }
+        ]},
+        'div': { title: 'Divisiones', color: 'c-div', games: [
+            { n: '🍽️ Platos', f: () => initDragDiv('Reparte', '💎', 't-plato') },
+            { n: '💰 Cofres', f: () => initDragDiv('Guarda', '🪙', 't-cofre') },
+            { n: '🐶 Perritos', f: () => initDragDiv('Dale', '🦴', 't-perro') },
+            { n: '🏀 Canastas', f: () => initDragDiv('Lanza', '🏀', 't-canasta') }
+        ]}
+    };
+
+    // --- NAVEGACIÓN ---
+    function navigate(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('btn-back').style.display = id === 'screen-main' ? 'none' : 'block';
+    }
+
+    function goBack() {
+        let active = document.querySelector('.screen.active').id;
+        if(active === 'screen-game') navigate('screen-sub'); else navigate('screen-main');
+    }
+
+    function showMenu(op) {
+        let d = DB[op];
+        document.getElementById('sub-title').innerText = d.title;
+        document.getElementById('sub-title').className = d.color;
+        let list = document.getElementById('sub-list'); list.innerHTML = '';
+        d.games.forEach(g => {
+            let b = document.createElement('button'); b.className = `btn-menu ${d.color}`;
+            b.innerText = g.n; 
+            b.onclick = () => { currentInitFunc = g.f; restartCurrentGame(); navigate('screen-game'); };
+            list.appendChild(b);
+        });
+        navigate('screen-sub');
+    }
+
+    function restartCurrentGame() {
+        document.getElementById('game-feedback').innerText = '';
+        document.getElementById('btn-check').style.display = 'block';
+        document.getElementById('btn-next').style.display = 'none';
+        if(currentInitFunc) currentInitFunc();
+    }
+
+    function winMsg(msg) {
+        points++; document.getElementById('score').innerText = points;
+        let fb = document.getElementById('game-feedback');
+        fb.innerText = msg; fb.style.color = 'var(--success)';
+        document.getElementById('btn-check').style.display = 'none';
+        document.getElementById('btn-next').style.display = 'block';
+    }
+
+    function failMsg(msg) {
+        let fb = document.getElementById('game-feedback');
+        fb.innerText = msg; fb.style.color = 'var(--danger)';
+    }
+
+    function checkCurrentGame() { if(checkLogic) checkLogic(); }
+
+    // --- MOTOR DRAG & DROP UNIVERSAL ---
+    let dragged = null, ox=0, oy=0;
+    function dragify(el, onDrop) {
+        el.onpointerdown = e => {
+            dragged = el; el.dropCb = onDrop;
+            let r = el.getBoundingClientRect(); ox = e.clientX - r.left; oy = e.clientY - r.top;
+            el.classList.add('dragging'); document.body.appendChild(el);
+            el.style.left = (e.clientX - ox)+'px'; el.style.top = (e.clientY - oy)+'px';
+        };
+    }
+    document.onpointermove = e => { if(dragged) { dragged.style.left = (e.clientX-ox)+'px'; dragged.style.top = (e.clientY-oy)+'px'; }};
+    document.onpointerup = e => { if(dragged) { dragged.classList.remove('dragging'); if(dragged.dropCb) dragged.dropCb(e.clientX, e.clientY, dragged); dragged = null; }};
+    function hit(x, y, el) { let r = el.getBoundingClientRect(); return x>=r.left && x<=r.right && y>=r.top && y<=r.bottom; }
+
+    function setupUI(msg) {
+        document.getElementById('game-instr').innerText = msg;
+        document.getElementById('game-top').innerHTML = '';
+        document.getElementById('game-bot').innerHTML = '';
+        gameState = { targets: [] };
+    }
+
+    function createDraggables(count, emoji, consume) {
+        let bot = document.getElementById('game-bot');
+        for(let i=0; i<count; i++) {
+            let item = document.createElement('div');
+            item.className = 'drag-item'; item.innerText = emoji;
+            dragify(item, (x,y,el) => {
+                let dropped = false;
+                gameState.targets.forEach(td => {
+                    if(!dropped && hit(x,y,td.el)) {
+                        td.c++; dropped = true;
+                        if(consume) el.remove(); 
+                        else { el.style.position='static'; td.el.appendChild(el); }
+                    }
+                });
+                if(!dropped) { el.style.position='static'; bot.appendChild(el); }
+            });
+            bot.appendChild(item);
+        }
+    }
+
+    // --- LÓGICAS DE JUEGOS ---
+
+    // 4 JUEGOS DE SUMA
+    function initDrag(verb, emoji, tCount, tClass, consume) {
+        let t = Math.floor(Math.random()*4)+4; // 4 a 7
+        setupUI(`${verb} exactamente ${t} ${emoji}`);
+        let top = document.getElementById('game-top');
+        let box = document.createElement('div'); box.className = `target ${tClass}`;
+        if(tClass==='t-cerdito') box.innerText = '🐷';
+        top.appendChild(box); gameState.targets.push({el:box, c:0});
+        createDraggables(t+3, emoji, consume);
+        
+        checkLogic = () => {
+            let count = gameState.targets[0].c;
+            if(count === t) winMsg(`¡Excelente! Hay ${t} ${emoji}.`);
+            else failMsg(`Pusiste ${count}, necesitas ${t}.`);
+        };
+    }
+
+    // 2 JUEGOS DE RESTA (Arrastrar)
+    function initDragSub(verb, emoji, tClass) {
+        let total = Math.floor(Math.random()*3)+5; // 5 a 7
+        let toSub = Math.floor(Math.random()*3)+2; // 2 a 4
+        setupUI(`Hay ${total}. ${verb} ${toSub} ${emoji}.`);
+        let top = document.getElementById('game-top');
+        let ent = document.createElement('div'); ent.className = `target ${tClass}`;
+        ent.innerText = tClass==='t-monstruo'?'👹':'🛸';
+        top.appendChild(ent); gameState.targets.push({el:ent, c:0});
+        createDraggables(total, emoji, true);
+        
+        checkLogic = () => {
+            let count = gameState.targets[0].c;
+            if(count === toSub) winMsg(`¡Bien! ${total} - ${toSub} = ${total-toSub}.`);
+            else failMsg(`Le diste ${count}. Debes darle exactamente ${toSub}.`);
+        };
+    }
+
+    // 2 JUEGOS DE RESTA (Explotar/Borrar)
+    function initDestroy(verb, emoji) {
+        let total = Math.floor(Math.random()*3)+5;
+        let toSub = Math.floor(Math.random()*2)+2;
+        setupUI(`Hay ${total}. ${verb} ${toSub} ${emoji}.`);
+        let bot = document.getElementById('game-bot'); bot.innerHTML = '';
+        gameState.destroyed = 0;
+        for(let i=0; i<total; i++) {
+            let item = document.createElement('div'); item.className='click-item'; item.innerText=emoji;
+            item.onclick = () => { item.style.transform='scale(0)'; setTimeout(()=>item.remove(),200); gameState.destroyed++; };
+            bot.appendChild(item);
+        }
+        checkLogic = () => {
+            if(gameState.destroyed === toSub) winMsg(`¡Correcto! Quedan ${total-toSub}.`);
+            else failMsg(`Quitaste ${gameState.destroyed}. Deben ser ${toSub}.`);
+        };
+    }
+
+    // 2 JUEGOS DE MULTIPLICACIÓN (Arrastrar a Grupos)
+    function initDragMul(verb, emoji, tClass) {
+        let groups = Math.floor(Math.random()*2)+2; // 2 a 3
+        let perGroup = Math.floor(Math.random()*2)+2; // 2 a 3
+        setupUI(`${verb} ${perGroup} ${emoji} en cada espacio.`);
+        let top = document.getElementById('game-top');
+        for(let i=0; i<groups; i++) {
+            let box = document.createElement('div'); box.className=`target ${tClass}`;
+            top.appendChild(box); gameState.targets.push({el:box, c:0});
+        }
+        createDraggables(groups*perGroup + 2, emoji, false);
+        checkLogic = () => {
+            let allOk = gameState.targets.every(td => td.c === perGroup);
+            if(allOk) winMsg(`¡Genial! ${groups} grupos de ${perGroup} = ${groups*perGroup}.`);
+            else failMsg(`Revisa. Cada espacio debe tener exactamente ${perGroup}.`);
+        };
+    }
+
+    // 1 JUEGO DE MULTIPLICACIÓN (Clonador)
+    function initCloner() {
+        let grp = Math.floor(Math.random()*2)+2;
+        let tms = Math.floor(Math.random()*3)+2;
+        setupUI(`Haz clic para clonar grupos de ${grp}, ${tms} veces.`);
+        let bot = document.getElementById('game-bot'); bot.innerHTML='';
+        let top = document.getElementById('game-top');
+        let btn = document.createElement('button'); btn.className='btn-check'; btn.innerText='⚡ Clonar';
+        btn.style.background='var(--warning)'; btn.style.width='auto'; btn.style.margin='0 auto';
+        gameState.cloned = 0;
+        btn.onclick = () => {
+            gameState.cloned++;
+            let g = document.createElement('div'); g.className='target t-caja'; g.style.height='auto'; g.innerText='⭐'.repeat(grp);
+            g.style.fontSize='2rem'; top.appendChild(g);
+        };
+        bot.appendChild(btn);
+        checkLogic = () => {
+            if(gameState.cloned === tms) winMsg(`¡${grp} x ${tms} = ${grp*tms}!`);
+            else failMsg(`Has clonado ${gameState.cloned} veces. Necesitas ${tms}.`);
+        };
+    }
+
+    // 1 JUEGO DE MULTIPLICACIÓN (Fábrica/Matriz)
+    function initGrid() {
+        let rows = Math.floor(Math.random()*2)+2; let cols = Math.floor(Math.random()*3)+2;
+        setupUI(`Arma una cuadrícula de ${rows} filas y ${cols} columnas.`);
+        let top = document.getElementById('game-top'); let bot = document.getElementById('game-bot'); bot.innerHTML='';
+        let grid = document.createElement('div'); grid.className='grid-machine'; top.appendChild(grid);
+        gameState.r = 1; gameState.c = 1;
+        let updateGrid = () => {
+            grid.style.gridTemplateColumns = `repeat(${gameState.c}, 1fr)`; grid.innerHTML='';
+            for(let i=0; i<gameState.r*gameState.c; i++) { let cell=document.createElement('div'); cell.className='grid-cell'; grid.appendChild(cell); }
+        };
+        let bRow = document.createElement('button'); bRow.className='btn-check'; bRow.innerText='+ Fila'; bRow.style.width='45%'; bRow.onclick=()=>{if(gameState.r<5) gameState.r++; updateGrid();};
+        let bCol = document.createElement('button'); bCol.className='btn-check'; bCol.innerText='+ Columna'; bCol.style.width='45%'; bCol.onclick=()=>{if(gameState.c<5) gameState.c++; updateGrid();};
+        bot.appendChild(bRow); bot.appendChild(bCol); updateGrid();
+        checkLogic = () => {
+            if(gameState.r===rows && gameState.c===cols) winMsg(`¡${rows} x ${cols} = ${rows*cols}!`);
+            else failMsg(`Tu cuadrícula es de ${gameState.r}x${gameState.c}.`);
+        };
+    }
+
+    // 4 JUEGOS DE DIVISIÓN (Repartir)
+    function initDragDiv(verb, emoji, tClass) {
+        let groups = Math.floor(Math.random()*2)+2; // 2 a 3
+        let perGroup = Math.floor(Math.random()*2)+2; // 2 a 3
+        let total = groups * perGroup;
+        setupUI(`${verb} ${total} ${emoji} en partes iguales.`);
+        let top = document.getElementById('game-top');
+        for(let i=0; i<groups; i++) {
+            let box = document.createElement('div'); box.className=`target ${tClass}`;
+            if(tClass==='t-perro') box.innerText='🐶';
+            top.appendChild(box); gameState.targets.push({el:box, c:0});
+        }
+        createDraggables(total, emoji, tClass==='t-perro');
+        checkLogic = () => {
+            let sum = gameState.targets.reduce((acc, td) => acc + td.c, 0);
+            if(sum !== total) { failMsg(`Faltan ${emoji} por repartir.`); return; }
+            let first = gameState.targets[0].c;
+            let allEq = gameState.targets.every(td => td.c === first);
+            if(allEq) winMsg(`¡Justo! ${total} ÷ ${groups} = ${first}.`);
+            else failMsg(`¡Cuidado! No todos tienen la misma cantidad.`);
+        };
+    }
+
+</script>
+</body>
+</html>
