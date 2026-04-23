@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MathADHD - Interfaz 100% Adaptativa y Segura</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+
+        :root { 
+            --bg: linear-gradient(135deg, #E0F2FE 0%, #DBEAFE 100%);
+            --primary: #2563EB; --primary-shadow: #1D4ED8;
+            --success: #059669; --success-shadow: #047857;
+            --warning: #D97706; --warning-shadow: #B45309;
+            --danger: #DC2626; --danger-shadow: #B91C1C;
+            --purple: #7C3AED; --purple-shadow: #6D28D9;
+        }
+
+        * { box-sizing: border-box; touch-action: none; font-family: 'Nunito', sans-serif; user-select: none; }
+        
+        body { background: var(--bg); margin: 0; display: flex; justify-content: center; height: 100vh; width: 100vw; overflow: hidden; color: #1E293B; }
+        
+        /* SCROLL GENERAL: Fundamental para cuando las cajas crecen mucho hacia abajo */
+        .app { width: 100vw; height: 100vh; display: flex; flex-direction: column; overflow-y: auto; }
+        
+        /* Cabecera */
+        .top-bar { 
+            background: var(--primary); color: #FFF; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
+            font-family: 'Fredoka One'; font-size: 2rem; z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-radius: 0 0 20px 20px; flex-shrink: 0;
+        }
+        .btn-back { background: rgba(255,255,255,0.25); border: none; color: #FFF; padding: 10px 25px; border-radius: 15px; font-family: 'Fredoka One'; font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+        .btn-back:active { transform: scale(0.95); background: rgba(255,255,255,0.4); }
+        
+        /* Pantallas */
+        .screen { display: none; flex: 1; padding: 40px 20px; flex-direction: column; align-items: center; overflow-y: visible; max-width: 1400px; width: 100%; margin: 0 auto; height: max-content;}
+        .screen.active { display: flex; animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        h1 { font-family: 'Fredoka One'; font-size: 4rem; color: var(--primary); margin-bottom: 40px; text-align: center; text-shadow: 2px 2px 0px #FFF;}
+        h2 { font-family: 'Fredoka One'; font-size: 3rem; margin-bottom: 30px; text-align: center;}
+
+        /* Instrucciones */
+        .instruction { background: #FFF; padding: 25px 40px; border-radius: 25px; font-size: 2.2rem; width: 100%; text-align: center; margin-bottom: 30px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 4px solid #F1F5F9; }
+        .instruction b { color: var(--primary); font-size: 2.6rem; font-family: 'Fredoka One'; }
+
+        /* Menús */
+        .grid-2x2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px; width: 100%; max-width: 1000px; margin: 0 auto; }
+        .btn-menu { border: 6px solid; border-radius: 30px; padding: 40px 20px; font-size: 2.5rem; font-family: 'Fredoka One'; cursor: pointer; box-shadow: 0 12px 0; background: #FFF; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.1s; gap: 15px; }
+        .btn-menu:active { transform: translateY(12px); box-shadow: 0 0 0 !important; }
+        
+        .c-add { border-color: var(--success); color: var(--success); box-shadow: 0 12px 0 var(--success-shadow); }
+        .c-sub { border-color: var(--danger); color: var(--danger); box-shadow: 0 12px 0 var(--danger-shadow); }
+        .c-mul { border-color: var(--warning); color: var(--warning); box-shadow: 0 12px 0 var(--warning-shadow); }
+        .c-div { border-color: var(--purple); color: var(--purple); box-shadow: 0 12px 0 var(--purple-shadow); }
+
+        /* Áreas de Juego - flex-start permite que crezcan independientemente hacia abajo */
+        .game-area { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 30px; min-height: 120px; padding: 25px; border-radius: 25px; height: max-content; margin-bottom: 10px;}
+        .area-top { background: transparent;}
+        .area-bot { background: #FFF; border: 4px solid #E2E8F0; box-shadow: inset 0 10px 20px rgba(0,0,0,0.05); align-items: center;}
+
+        /* Elementos Arrastrables (Tamaño moderado para caber mejor) */
+        .drag-item { width: 65px; height: 65px; display: flex; justify-content: center; align-items: center; font-size: 3.5rem; cursor: grab; z-index: 100; transition: transform 0.1s; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.2)); touch-action: none; position: relative; }
+        .drag-item.dragging { z-index: 999; filter: drop-shadow(0 20px 20px rgba(0,0,0,0.4)); transform: scale(1.4); cursor: grabbing;}
+        
+        .click-item { width: 65px; height: 65px; font-size: 3.5rem; cursor: pointer; transition: transform 0.2s; text-align: center; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.2));}
+        .click-item.destroyed { transform: scale(0); opacity: 0; pointer-events: none; }
+
+        /* Contenedores: Adaptables y seguros */
+        .target-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; height: max-content; max-width: 100%; }
+        .target-icon { font-size: 4.5rem; line-height: 1; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.15)); margin-bottom: -10px; z-index: 2;}
+
+        /* EL CORAZÓN DE LA ADAPTABILIDAD: min-width y padding. Sin widths fijos. */
+        .target { display: flex; flex-direction: row; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 10px; padding: 15px; transition: 0.3s ease; min-height: 100px; height: auto; }
+        
+        .t-caja { min-width: 180px; border: 6px dashed #94A3B8; border-radius: 20px; background: rgba(255,255,255,0.8); }
+        .t-pecera { min-width: 180px; border: 6px solid #3B82F6; border-radius: 60px; background: rgba(219, 234, 254, 0.8); padding: 25px;}
+        .t-mochila { min-width: 180px; border: 6px solid #F59E0B; border-radius: 30px 30px 10px 10px; background: rgba(254, 243, 199, 0.9); }
+        .t-regalo { min-width: 150px; border: 6px solid #EF4444; border-radius: 15px; background: #FECACA; }
+        .t-nido { min-width: 180px; border: 6px solid #92400E; border-radius: 0 0 60px 60px; background: #FEF3C7;}
+        .t-plato { min-width: 180px; border: 6px solid #94A3B8; border-radius: 60px; background: #FFF; box-shadow: inset 0 10px 20px rgba(0,0,0,0.1); padding: 25px;}
+        .t-cofre { min-width: 180px; border: 6px solid #713F12; border-radius: 15px 15px 0 0; background: #A16207; }
+        .t-canasta { min-width: 180px; border: 6px solid #EA580C; border-top: none; border-radius: 0 0 30px 30px; background: transparent; }
+        
+        /* Tazones/Bandejas para personajes */
+        .t-tazon { min-width: 160px; border: 6px solid #475569; border-radius: 0 0 40px 40px; background: #CBD5E0; box-shadow: inset 0 10px 15px rgba(0,0,0,0.2); }
+        .t-bandeja { min-width: 200px; border: 6px solid #64748B; border-radius: 20px; background: #E2E8F0; }
+
+        /* Cuadrícula (Para la Fábrica) */
+        .grid-machine { display: grid; gap: 8px; margin: 0 auto; background: #333; padding: 15px; border-radius: 15px; box-shadow: 0 15px 30px rgba(0,0,0,0.3);}
+        .grid-cell { width: 45px; height: 45px; background: var(--warning); border-radius: 8px; }
+
+        /* Botones de Acción */
+        .actions-container { display: flex; gap: 20px; justify-content: center; width: 100%; max-width: 900px; margin: 20px auto 30px; flex-wrap: wrap; flex-shrink: 0; position: relative;}
+        
+        .btn-reset { background: #94A3B8; color: white; border: none; padding: 20px 30px; border-radius: 30px; font-size: 1.8rem; font-family: 'Fredoka One'; cursor: pointer; box-shadow: 0 8px 0 #64748B; transition: 0.1s; display: block; flex: 1; min-width: 250px;}
+        .btn-reset:active { transform: translateY(8px); box-shadow: 0 0 0; }
+
+        .btn-check { background: var(--primary); color: white; border: none; padding: 20px 40px; border-radius: 30px; font-size: 2.2rem; font-family: 'Fredoka One'; cursor: pointer; box-shadow: 0 8px 0 var(--primary-shadow); transition: 0.1s; display: block; flex: 2; min-width: 300px;}
+        .btn-check:active { transform: translateY(8px); box-shadow: 0 0 0; }
+        
+        .btn-next { background: var(--success); color: white; border: none; padding: 20px 40px; border-radius: 30px; font-size: 2.2rem; font-family: 'Fredoka One'; cursor: pointer; box-shadow: 0 8px 0 var(--success-shadow); display: none; width: 100%; max-width: 600px;}
+        .btn-next:active { transform: translateY(8px); box-shadow: 0 0 0; }
+        
+        .feedback { font-size: 2.2rem; font-family: 'Fredoka One'; text-align: center; margin-top: 15px; min-height: 50px; transition: 0.2s; width: 100%; flex-shrink: 0;}
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px) rotate(-3deg); } 50% { transform: translateX(15px) rotate(3deg); } 75% { transform: translateX(-15px) rotate(-3deg); } }
+        .shake-anim { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; color: var(--danger) !important; }
+
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="top-bar">
+        <button class="btn-back" id="btn-back" style="display:none;" onclick="goBack()">◀ Volver</button>
+        <span>MathADHD</span>
+        <span>⭐ <span id="score">0</span></span>
+    </div>
+
+    <div id="screen-main" class="screen active">
+        <h1>Misión Espacial Matemática</h1>
+        <div class="grid-2x2">
+            <button class="btn-menu c-add" onclick="showMenu('add')"><span style="font-size:5rem;">➕</span>Sumar</button>
+            <button class="btn-menu c-sub" onclick="showMenu('sub')"><span style="font-size:5rem;">➖</span>Restar</button>
+            <button class="btn-menu c-mul" onclick="showMenu('mul')"><span style="font-size:5rem;">✖️</span>Multiplicar</button>
+            <button class="btn-menu c-div" onclick="showMenu('div')"><span style="font-size:5rem;">➗</span>Dividir</button>
+        </div>
+    </div>
+
+    <div id="screen-sub" class="screen">
+        <h2 id="sub-title">Elige tu Reto</h2>
+        <div class="grid-2x2" id="sub-list"></div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="instruction" id="game-instr"></div>
+        <div id="game-top" class="game-area area-top"></div>
+        <div id="game-bot" class="game-area area-bot"></div>
+        <div id="game-feedback" class="feedback"></div>
+        
+        <div class="actions-container" id="actions-container">
+            <button class="btn-reset" id="btn-reset" onclick="resetLevel()">↻ Devolver Todo</button>
+            <button class="btn-check" id="btn-check" onclick="checkCurrentGame()">¡Comprobar Respuesta!</button>
+            <button class="btn-next" id="btn-next" onclick="restartCurrentGame()">¡Siguiente Reto!</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let points = 0;
+    let currentInitFunc = null; 
+    let checkLogic = null;
+    let gameState = {};
+
+    const DB = {
+        'add': { title: 'Retos de Suma', color: 'c-add', games: [
+            { n: '📦 Caja Mágica', f: () => initDrag('manzanas', '🍎', 't-caja', null) },
+            { n: '🐟 Pecera', f: () => initDrag('peces', '🐟', 't-pecera', null) },
+            { n: '🎒 Mochila', f: () => initDrag('lápices', '✏️', 't-mochila', null) },
+            { n: '🐷 Alcancía', f: () => initDrag('monedas', '🪙', 't-bandeja', '🐷') }
+        ]},
+        'sub': { title: 'Retos de Resta', color: 'c-sub', games: [
+            { n: '👹 Monstruo', f: () => initDragSub('🍪', 't-tazon', '👹') },
+            { n: '🛸 Nave Espacial', f: () => initDragSub('👽', 't-bandeja', '🛸') },
+            { n: '🎈 Pinchando Globos', f: () => initDestroy('🎈') },
+            { n: '🧹 Borrador Mágico', f: () => initDestroy('🟤') }
+        ]},
+        'mul': { title: 'Retos de Multiplicación', color: 'c-mul', games: [
+            { n: '⚡ Clonador', f: initCloner },
+            { n: '🏭 Fábrica', f: initGrid },
+            { n: '🎁 Regalos', f: () => initDragMul('Moños', '🎀', 't-regalo', null) },
+            { n: '🥚 Nidos', f: () => initDragMul('Huevos', '🥚', 't-nido', null) }
+        ]},
+        'div': { title: 'Retos de División', color: 'c-div', games: [
+            { n: '🍽️ Platos', f: () => initDragDiv('Joyas', '💎', 't-plato', null) },
+            { n: '💰 Cofres', f: () => initDragDiv('Monedas', '🪙', 't-cofre', null) },
+            { n: '🐶 Perritos', f: () => initDragDiv('Huesos', '🦴', 't-tazon', '🐶') },
+            { n: '🏀 Canastas', f: () => initDragDiv('Balones', '🏀', 't-canasta', null) }
+        ]}
+    };
+
+    function navigate(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('btn-back').style.display = id === 'screen-main' ? 'none' : 'block';
+    }
+
+    function goBack() {
+        let active = document.querySelector('.screen.active').id;
+        if(active === 'screen-game') navigate('screen-sub'); else navigate('screen-main');
+    }
+
+    function showMenu(op) {
+        let d = DB[op];
+        document.getElementById('sub-title').innerText = d.title;
+        document.getElementById('sub-title').className = d.color;
+        let list = document.getElementById('sub-list'); list.innerHTML = '';
+        d.games.forEach(g => {
+            let b = document.createElement('button'); b.className = `btn-menu ${d.color}`;
+            b.innerText = g.n; 
+            b.onclick = () => { currentInitFunc = g.f; restartCurrentGame(); navigate('screen-game'); };
+            list.appendChild(b);
+        });
+        navigate('screen-sub');
+    }
+
+    function restartCurrentGame() {
+        document.getElementById('game-feedback').innerText = '';
+        document.getElementById('game-feedback').className = 'feedback';
+        document.getElementById('btn-check').style.display = 'block';
+        document.getElementById('btn-reset').style.display = 'block';
+        document.getElementById('btn-next').style.display = 'none';
+        if(currentInitFunc) currentInitFunc();
+    }
+
+    function resetLevel() {
+        let bot = document.getElementById('game-bot');
+        document.querySelectorAll('.target .drag-item').forEach(el => {
+            el.style.position = 'relative'; 
+            bot.appendChild(el);
+        });
+
+        document.querySelectorAll('.click-item').forEach(el => {
+            el.style.transform = 'scale(1)';
+            el.classList.remove('destroyed');
+        });
+
+        if(gameState) {
+            gameState.destroyed = 0;
+            if(gameState.cloned !== undefined || gameState.r !== undefined) {
+                currentInitFunc(); 
+                return; 
+            }
+        }
+
+        document.getElementById('game-feedback').innerText = '';
+        document.getElementById('game-feedback').className = 'feedback';
+    }
+
+    function winMsg(msg) {
+        points++; document.getElementById('score').innerText = points;
+        let fb = document.getElementById('game-feedback');
+        fb.className = 'feedback'; 
+        fb.innerText = "¡Excelente! " + msg; fb.style.color = 'var(--success)';
+        document.getElementById('btn-check').style.display = 'none';
+        document.getElementById('btn-reset').style.display = 'none'; 
+        document.getElementById('btn-next').style.display = 'block';
+    }
+
+    function failMsg(msg) {
+        let fb = document.getElementById('game-feedback');
+        fb.innerHTML = "¡Ups! " + msg + " <br>¡Inténtalo de nuevo!"; 
+        fb.className = 'feedback shake-anim';
+        setTimeout(() => fb.classList.remove('shake-anim'), 500);
+    }
+
+    function checkCurrentGame() { if(checkLogic) checkLogic(); }
+    const randomMsg = (msgs) => msgs[Math.floor(Math.random() * msgs.length)];
+
+    let dragged = null;
+    let ox = 0, oy = 0;
+
+    function dragify(el, onDrop) {
+        el.addEventListener('pointerdown', e => {
+            e.preventDefault();
+            dragged = el;
+            el.dropCb = onDrop;
+            
+            let r = el.getBoundingClientRect();
+            ox = e.clientX - r.left;
+            oy = e.clientY - r.top;
+            
+            el.style.width = r.width + 'px';
+            el.style.height = r.height + 'px';
+            
+            el.style.position = 'absolute';
+            el.style.left = (e.clientX - ox) + 'px';
+            el.style.top = (e.clientY - oy) + 'px';
+            document.body.appendChild(el);
+            
+            el.classList.add('dragging');
+            el.setPointerCapture(e.pointerId);
+        });
+
+        el.addEventListener('pointermove', e => {
+            if(dragged === el) {
+                el.style.left = (e.clientX - ox) + 'px';
+                el.style.top = (e.clientY - oy) + 'px';
+            }
+        });
+
+        const release = (e) => {
+            if(dragged === el) {
+                el.releasePointerCapture(e.pointerId);
+                
+                if(el.dropCb) el.dropCb(e.clientX, e.clientY, el);
+
+                if(el.parentNode === document.body) {
+                    document.getElementById('game-bot').appendChild(el);
+                }
+
+                el.classList.remove('dragging');
+                el.style.position = 'relative'; 
+                el.style.left = '';
+                el.style.top = '';
+                el.style.width = '';
+                el.style.height = '';
+                
+                dragged = null;
+            }
+        };
+
+        el.addEventListener('pointerup', release);
+        el.addEventListener('pointercancel', release);
+    }
+
+    function hit(x, y, el) { 
+        let r = el.getBoundingClientRect(); return x>=r.left && x<=r.right && y>=r.top && y<=r.bottom;
+    }
+
+    function setupUI(msg) {
+        document.getElementById('game-instr').innerHTML = msg; 
+        document.getElementById('game-top').innerHTML = '';
+        document.getElementById('game-bot').innerHTML = '';
+        gameState = { targets: [] };
+    }
+
+    function createTargetNode(tClass, icon) {
+        if(icon) {
+            let wrap = document.createElement('div'); wrap.className = 'target-wrap';
+            let ico = document.createElement('div'); ico.className = 'target-icon'; ico.innerText = icon;
+            let drop = document.createElement('div'); drop.className = `target ${tClass}`;
+            wrap.appendChild(ico); wrap.appendChild(drop);
+            return { wrap: wrap, drop: drop };
+        } else {
+            let wrap = document.createElement('div'); wrap.className = 'target-wrap';
+            let drop = document.createElement('div'); drop.className = `target ${tClass}`;
+            wrap.appendChild(drop);
+            return { wrap: wrap, drop: drop };
+        }
+    }
+
+    function createDraggables(count, emoji) {
+        let bot = document.getElementById('game-bot');
+        for(let i=0; i<count; i++) {
+            let item = document.createElement('div');
+            item.className = 'drag-item'; item.innerText = emoji;
+            
+            dragify(item, (x,y,el) => {
+                let dropped = false;
+                gameState.targets.forEach(td => {
+                    if(!dropped && hit(x,y,td.drop)) {
+                        dropped = true;
+                        td.drop.appendChild(el); 
+                    }
+                });
+                if(!dropped) { bot.appendChild(el); }
+            });
+            bot.appendChild(item);
+        }
+    }
+
+    function initDrag(name, emoji, tClass, icon) {
+        let t = Math.floor(Math.random()*4)+4; 
+        let frases = [
+            `¡Misión! Logra que haya exactamente <b>${t}</b> ${name} en el objetivo.`,
+            `¡Secreto! Necesitamos guardar <b>${t}</b> ${name} aquí dentro.`,
+            `¡Ayuda! Pon <b>${t}</b> ${name} en el recipiente correcto.`
+        ];
+        setupUI(randomMsg(frases));
+
+        let top = document.getElementById('game-top');
+        let targetData = createTargetNode(tClass, icon);
+        top.appendChild(targetData.wrap); 
+        gameState.targets.push(targetData);
+        
+        createDraggables(t+4, emoji); 
+        
+        checkLogic = () => {
+            let count = gameState.targets[0].drop.querySelectorAll('.drag-item').length;
+            if(count === t) winMsg(`Completaste el objetivo de ${t}.`);
+            else failMsg(`Has puesto ${count}, pero la misión pide ${t}.`);
+        };
+    }
+
+    function initDragSub(emoji, tClass, icon) {
+        let total = Math.floor(Math.random()*4)+6;
+        let toSub = Math.floor(Math.random()*3)+2;
+        let target = total - toSub;
+        
+        let frases = [
+            `Tienes <b>${total}</b> ${emoji}. Pásalos al recipiente hasta que a ti te queden solo <b>${target}</b> abajo.`,
+            `Hay <b>${total}</b> ${emoji}. Pasa algunos al objetivo para que te sobren <b>${target}</b> en la bandeja inferior.`,
+            `¡Misión! Empiezas con <b>${total}</b> ${emoji}. Dale los necesarios al objetivo hasta tener <b>${target}</b> libres abajo.`
+        ];
+        setupUI(randomMsg(frases));
+
+        let top = document.getElementById('game-top');
+        let targetData = createTargetNode(tClass, icon);
+        top.appendChild(targetData.wrap); 
+        gameState.targets.push(targetData);
+        
+        createDraggables(total, emoji);
+        
+        checkLogic = () => {
+            let currentLeft = document.getElementById('game-bot').querySelectorAll('.drag-item').length;
+            if(currentLeft === target) winMsg(`${total} - ${toSub} = ${target}.`);
+            else failMsg(`Te han quedado ${currentLeft} abajo. Deben quedarte exactamente ${target}.`);
+        };
+    }
+
+    function initDestroy(emoji) {
+        let total = Math.floor(Math.random()*4)+6;
+        let toSub = Math.floor(Math.random()*3)+2;
+        let target = total - toSub;
+
+        let frases = [
+            `Hay <b>${total}</b> ${emoji}. Elimina algunos haciendo clic para que sobren exactamente <b>${target}</b>.`,
+            `¡Demasiados! De los <b>${total}</b> ${emoji}, haz que desaparezcan los necesarios hasta tener <b>${target}</b>.`,
+            `Tienes <b>${total}</b> ${emoji}. Destruye los que sobren para quedarte con <b>${target}</b>.`
+        ];
+        setupUI(randomMsg(frases));
+
+        let bot = document.getElementById('game-bot'); bot.innerHTML = '';
+        gameState.destroyed = 0;
+        for(let i=0; i<total; i++) {
+            let item = document.createElement('div');
+            item.className='click-item'; item.innerText=emoji;
+            item.onclick = () => { 
+                if(!item.classList.contains('destroyed')){
+                    item.style.transform='scale(0)'; 
+                    item.classList.add('destroyed');
+                    gameState.destroyed++; 
+                }
+            };
+            bot.appendChild(item);
+        }
+        checkLogic = () => {
+            let currentLeft = total - gameState.destroyed;
+            if(currentLeft === target) winMsg(`${total} - ${toSub} = ${target}.`);
+            else failMsg(`Han quedado ${currentLeft}. ¡Deben sobrar ${target}!`);
+        };
+    }
+
+    function initDragMul(name, emoji, tClass, icon) {
+        let groups = Math.floor(Math.random()*2)+2;
+        let perGroup = Math.floor(Math.random()*2)+2;
+        
+        let frases = [
+            `Reto: Forma <b>${groups}</b> grupos. Cada zona debe tener exactamente <b>${perGroup}</b> ${name}.`,
+            `Acomoda todo en <b>${groups}</b> espacios, poniendo <b>${perGroup}</b> ${name} en cada uno.`,
+            `¡Organiza! Crea <b>${groups}</b> conjuntos que tengan <b>${perGroup}</b> ${name} cada uno.`
+        ];
+        setupUI(randomMsg(frases));
+
+        let top = document.getElementById('game-top');
+        for(let i=0; i<groups; i++) {
+            let targetData = createTargetNode(tClass, icon);
+            top.appendChild(targetData.wrap); 
+            gameState.targets.push(targetData);
+        }
+        createDraggables(groups*perGroup + 3, emoji);
+        checkLogic = () => {
+            let allOk = gameState.targets.every(td => td.drop.querySelectorAll('.drag-item').length === perGroup);
+            if(allOk) winMsg(`${groups} grupos de ${perGroup} suman ${groups*perGroup}.`);
+            else failMsg(`Revisa cada espacio. Asegúrate de poner la cantidad exacta.`);
+        };
+    }
+
+    function initCloner() {
+        let grp = Math.floor(Math.random()*2)+2;
+        let tms = Math.floor(Math.random()*3)+2;
+        
+        let frases = [
+            `Fábrica: Necesitamos clonar <b>${tms}</b> veces un grupo base de <b>${grp}</b> estrellas.`,
+            `¡Multiplica! Queremos generar <b>${tms}</b> bloques idénticos de <b>${grp}</b> estrellas.`,
+            `Usa la máquina para crear <b>${tms}</b> cajas que contengan <b>${grp}</b> estrellas cada una.`
+        ];
+        setupUI(randomMsg(frases));
+
+        let bot = document.getElementById('game-bot'); bot.innerHTML='';
+        let top = document.getElementById('game-top');
+        
+        let btnContainer = document.createElement('div');
+        btnContainer.style.width = '100%';
+        btnContainer.style.display = 'flex';
+        btnContainer.style.justifyContent = 'center';
+        
+        let btn = document.createElement('button'); btn.className='btn-check'; btn.innerText='⚡ Clonar Grupo';
+        btn.style.background='var(--warning)'; btn.style.width='auto'; btn.style.boxShadow='0 8px 0 var(--warning-shadow)';
+        btn.style.marginTop='0';
+        
+        gameState.cloned = 0;
+        btn.onclick = () => {
+            gameState.cloned++;
+            let g = document.createElement('div'); g.className='target t-caja'; g.style.height='auto'; g.innerText='⭐'.repeat(grp);
+            g.style.fontSize='4rem'; top.appendChild(g);
+        };
+        btnContainer.appendChild(btn);
+        bot.appendChild(btnContainer);
+        
+        checkLogic = () => {
+            if(gameState.cloned === tms) winMsg(`Has clonado correctamente: ${grp} x ${tms} = ${grp*tms}.`);
+            else failMsg(`Llevas ${gameState.cloned} clones. La misión exige ${tms}.`);
+        };
+    }
+
+    function initGrid() {
+        let rows = Math.floor(Math.random()*2)+2; let cols = Math.floor(Math.random()*3)+2;
+        
+        let frases = [
+            `Construye: Crea un gran bloque de <b>${rows}</b> filas (horizontal) y <b>${cols}</b> columnas (vertical).`,
+            `Arquitecto: Diseña un panel rectangular que mida <b>${rows}</b> de alto por <b>${cols}</b> de ancho.`,
+            `Fábrica: Une las piezas para formar una estructura de <b>${rows}</b> filas por <b>${cols}</b> columnas.`
+        ];
+        setupUI(randomMsg(frases));
+
+        let top = document.getElementById('game-top'); let bot = document.getElementById('game-bot'); bot.innerHTML='';
+        let grid = document.createElement('div'); grid.className='grid-machine'; top.appendChild(grid);
+        gameState.r = 1; gameState.c = 1;
+        let updateGrid = () => {
+            grid.style.gridTemplateColumns = `repeat(${gameState.c}, 1fr)`; grid.innerHTML='';
+            for(let i=0; i<gameState.r*gameState.c; i++) { let cell=document.createElement('div'); cell.className='grid-cell'; grid.appendChild(cell); }
+        };
+        let bRow = document.createElement('button'); bRow.className='btn-check'; bRow.innerText='➕ Agregar Fila'; bRow.style.width='45%'; bRow.style.marginTop='0'; bRow.onclick=()=>{if(gameState.r<5) gameState.r++; updateGrid();};
+        let bCol = document.createElement('button'); bCol.className='btn-check'; bCol.innerText='➕ Agregar Columna'; bCol.style.width='45%'; bCol.style.marginTop='0'; bCol.onclick=()=>{if(gameState.c<5) gameState.c++; updateGrid();};
+        
+        let bContainer = document.createElement('div'); bContainer.style.display = 'flex'; bContainer.style.gap = '10px'; bContainer.style.width = '100%'; bContainer.style.justifyContent = 'center';
+        bContainer.appendChild(bRow); bContainer.appendChild(bCol); bot.appendChild(bContainer);
+        updateGrid();
+
+        checkLogic = () => {
+            if(gameState.r===rows && gameState.c===cols) winMsg(`¡Perfecto! ${rows} x ${cols} = ${rows*cols} piezas en total.`);
+            else failMsg(`Armaste una de ${gameState.r}x${gameState.c}. Vuelve a leer las instrucciones.`);
+        };
+    }
+
+    function initDragDiv(name, emoji, tClass, icon) {
+        let groups = Math.floor(Math.random()*2)+2; 
+        let perGroup = Math.floor(Math.random()*2)+2; 
+        let total = groups * perGroup; 
+        
+        let frases = [
+            `Justicia: Tienes <b>${total}</b> ${name}. Repártelos todos para que cada zona tenga exactamente lo mismo.`,
+            `Equidad: Reparte <b>${total}</b> ${name} en partes iguales sin que sobre ninguno abajo.`,
+            `¡Misión! Coloca los <b>${total}</b> ${name} en los espacios para que todos tengan la misma cantidad.`
+        ];
+        setupUI(randomMsg(frases));
+
+        let top = document.getElementById('game-top');
+        for(let i=0; i<groups; i++) {
+            let targetData = createTargetNode(tClass, icon);
+            top.appendChild(targetData.wrap); 
+            gameState.targets.push(targetData);
+        }
+        createDraggables(total, emoji);
+        checkLogic = () => {
+            let sum = 0;
+            gameState.targets.forEach(td => sum += td.drop.querySelectorAll('.drag-item').length);
+            if(sum !== total) { failMsg(`Aún te sobran elementos abajo. ¡Repártelos todos!`); return; }
+            
+            let first = gameState.targets[0].drop.querySelectorAll('.drag-item').length;
+            let allEq = gameState.targets.every(td => td.drop.querySelectorAll('.drag-item').length === first); 
+            if(allEq) winMsg(`Repartiste equitativamente: ${total} ÷ ${groups} = ${first}.`);
+            else failMsg(`Las zonas no están parejas. Algunas tienen más que otras.`);
+        };
+    }
+
+</script>
+</body>
+</html>
