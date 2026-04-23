@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+
+:root { 
+    --bg: linear-gradient(135deg, #E0F2FE 0%, #DBEAFE 100%);
+    --primary: #2563EB; --primary-shadow: #1D4ED8;
+    --success: #059669; --success-shadow: #047857;
+    --warning: #D97706; --warning-shadow: #B45309;
+    --danger: #DC2626; --danger-shadow: #B91C1C;
+    --purple: #7C3AED; --purple-shadow: #6D28D9;
+}
+
+* { box-sizing: border-box; touch-action: none; font-family: 'Nunito', sans-serif; user-select: none; }
+body { background: var(--bg); margin: 0; display: flex; justify-content: center; height: 100vh; width: 100vw; overflow: hidden; color: #1E293B; }
+
+.app { width: 100vw; height: 100vh; display: flex; flex-direction: column; overflow-y: auto; }
+
+.top-bar { 
+    background: var(--primary); color: #FFF; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Fredoka One'; font-size: 2rem; z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border-radius: 0 0 20px 20px; flex-shrink: 0;
+}
+
+.btn-back { background: rgba(255,255,255,0.25); border: none; color: #FFF; padding: 10px 25px; border-radius: 15px; font-family: 'Fredoka One'; font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+
+.screen { display: none; flex: 1; padding: 40px 20px; flex-direction: column; align-items: center; overflow-y: visible; max-width: 1400px; width: 100%; margin: 0 auto; height: max-content;}
+.screen.active { display: flex; animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+h1 { font-family: 'Fredoka One'; font-size: 4rem; color: var(--primary); margin-bottom: 40px; text-align: center; text-shadow: 2px 2px 0px #FFF;}
+h2 { font-family: 'Fredoka One'; font-size: 3rem; margin-bottom: 30px; text-align: center;}
+
+.instruction { background: #FFF; padding: 25px 40px; border-radius: 25px; font-size: 2.2rem; width: 100%; text-align: center; margin-bottom: 30px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 4px solid #F1F5F9; }
+.instruction b { color: var(--primary); font-size: 2.6rem; font-family: 'Fredoka One'; }
+
+.grid-2x2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px; width: 100%; max-width: 1000px; margin: 0 auto; }
+.btn-menu { border: 6px solid; border-radius: 30px; padding: 40px 20px; font-size: 2.5rem; font-family: 'Fredoka One'; cursor: pointer; box-shadow: 0 12px 0; background: #FFF; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.1s; gap: 15px; }
+.btn-menu:active { transform: translateY(12px); box-shadow: 0 0 0 !important; }
+
+.c-add { border-color: var(--success); color: var(--success); box-shadow: 0 12px 0 var(--success-shadow); }
+.c-sub { border-color: var(--danger); color: var(--danger); box-shadow: 0 12px 0 var(--danger-shadow); }
+.c-mul { border-color: var(--warning); color: var(--warning); box-shadow: 0 12px 0 var(--warning-shadow); }
+.c-div { border-color: var(--purple); color: var(--purple); box-shadow: 0 12px 0 var(--purple-shadow); }
+
+.game-area { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 30px; min-height: 120px; padding: 25px; border-radius: 25px; height: max-content; margin-bottom: 10px;}
+.area-top { background: transparent;}
+.area-bot { background: #FFF; border: 4px solid #E2E8F0; box-shadow: inset 0 10px 20px rgba(0,0,0,0.05); align-items: center;}
+
+.drag-item, .click-item { width: 65px; height: 65px; display: flex; justify-content: center; align-items: center; font-size: 3.5rem; cursor: grab; z-index: 100; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.2)); position: relative; }
+.drag-item.dragging { z-index: 999; filter: drop-shadow(0 20px 20px rgba(0,0,0,0.4)); transform: scale(1.4); cursor: grabbing;}
+
+.click-item { cursor: pointer; transition: transform 0.2s; text-align: center; }
+.click-item.destroyed { transform: scale(0); opacity: 0; pointer-events: none; }
+
+.target-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; height: max-content; max-width: 100%; }
+.target-icon { font-size: 4.5rem; line-height: 1; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.15)); margin-bottom: -10px; z-index: 2;}
+
+.target { display: flex; flex-direction: row; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 10px; padding: 15px; transition: 0.3s ease; min-height: 100px; height: auto; }
+.t-caja { min-width: 180px; border: 6px dashed #94A3B8; border-radius: 20px; background: rgba(255,255,255,0.8); }
+.t-pecera { min-width: 180px; border: 6px solid #3B82F6; border-radius: 60px; background: rgba(219, 234, 254, 0.8); padding: 25px;}
+.t-mochila { min-width: 180px; border: 6px solid #F59E0B; border-radius: 30px 30px 10px 10px; background: rgba(254, 243, 199, 0.9); }
+.t-tazon { min-width: 160px; border: 6px solid #475569; border-radius: 0 0 40px 40px; background: #CBD5E0; box-shadow: inset 0 10px 15px rgba(0,0,0,0.2); }
+.t-bandeja { min-width: 200px; border: 6px solid #64748B; border-radius: 20px; background: #E2E8F0; }
+.t-regalo { min-width: 150px; border: 6px solid #EF4444; border-radius: 15px; background: #FECACA; }
+.t-nido { min-width: 180px; border: 6px solid #92400E; border-radius: 0 0 60px 60px; background: #FEF3C7;}
+.t-plato { min-width: 180px; border: 6px solid #94A3B8; border-radius: 60px; background: #FFF; box-shadow: inset 0 10px 20px rgba(0,0,0,0.1); padding: 25px;}
+.t-cofre { min-width: 180px; border: 6px solid #713F12; border-radius: 15px 15px 0 0; background: #A16207; }
+.t-canasta { min-width: 180px; border: 6px solid #EA580C; border-top: none; border-radius: 0 0 30px 30px; background: transparent; }
+
+.grid-machine { display: grid; gap: 8px; margin: 0 auto; background: #333; padding: 15px; border-radius: 15px; box-shadow: 0 15px 30px rgba(0,0,0,0.3);}
+.grid-cell { width: 45px; height: 45px; background: var(--warning); border-radius: 8px; }
+
+.actions-container { display: flex; gap: 20px; justify-content: center; width: 100%; max-width: 900px; margin: 20px auto 30px; flex-wrap: wrap; flex-shrink: 0; position: relative;}
+.btn-reset, .btn-check, .btn-next { border: none; padding: 20px; border-radius: 30px; font-family: 'Fredoka One'; cursor: pointer; transition: 0.1s; }
+.btn-reset { background: #94A3B8; color: white; box-shadow: 0 8px 0 #64748B; flex: 1; min-width: 200px; font-size: 1.5rem;}
+.btn-check { background: var(--primary); color: white; box-shadow: 0 8px 0 var(--primary-shadow); flex: 2; min-width: 250px; font-size: 1.8rem;}
+.btn-next { background: var(--success); color: white; box-shadow: 0 8px 0 var(--success-shadow); width: 100%; max-width: 600px; font-size: 2rem; display: none; }
+.btn-reset:active, .btn-check:active, .btn-next:active { transform: translateY(8px); box-shadow: 0 0 0; }
+
+.feedback { font-size: 2.2rem; font-family: 'Fredoka One'; text-align: center; margin-top: 15px; min-height: 50px; transition: 0.2s; width: 100%; }
+.shake-anim { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; color: var(--danger) !important; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px); } 50% { transform: translateX(15px); } 75% { transform: translateX(-15px); } }

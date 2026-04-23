@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MathADHD - Interfaz Adaptativa</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+    <div class="top-bar">
+        <button class="btn-back" id="btn-back" style="display:none;">◀ Volver</button>
+        <span>MathADHD</span>
+        <span>⭐ <span id="score">0</span></span>
+    </div>
+
+    <div id="screen-main" class="screen active">
+        <h1>Misión Espacial Matemática</h1>
+        <div class="grid-2x2">
+            <button class="btn-menu c-add" data-op="add"><span style="font-size:5rem;">➕</span>Sumar</button>
+            <button class="btn-menu c-sub" data-op="sub"><span style="font-size:5rem;">➖</span>Restar</button>
+            <button class="btn-menu c-mul" data-op="mul"><span style="font-size:5rem;">✖️</span>Multiplicar</button>
+            <button class="btn-menu c-div" data-op="div"><span style="font-size:5rem;">➗</span>Dividir</button>
+        </div>
+    </div>
+
+    <div id="screen-sub" class="screen">
+        <h2 id="sub-title">Elige tu Reto</h2>
+        <div class="grid-2x2" id="sub-list"></div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="instruction" id="game-instr"></div>
+        <div id="game-top" class="game-area area-top"></div>
+        <div id="game-bot" class="game-area area-bot"></div>
+        <div id="game-feedback" class="feedback"></div>
+        
+        <div class="actions-container" id="actions-container">
+            <button class="btn-reset" id="btn-reset">↻ Devolver Todo</button>
+            <button class="btn-check" id="btn-check">¡Comprobar Respuesta!</button>
+            <button class="btn-next" id="btn-next">¡Siguiente Reto!</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/auth-manager.js"></script>
+<script src="js/accessibility.js"></script>
+<script src="js/effects-qa.js"></script>
+<script src="js/game-logic.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
