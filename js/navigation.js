@@ -1,5 +1,5 @@
 const Navigation = {
-    screens: ['screen-main', 'screen-sub', 'screen-game'],
+    screens: ['screen-main', 'screen-sub', 'screen-game', 'screen-result'],
 
     goTo(id) {
         this.screens.forEach(s => document.getElementById(s).classList.remove('active'));
@@ -10,6 +10,7 @@ const Navigation = {
     back() {
         let active = document.querySelector('.screen.active').id;
         if(active === 'screen-game') this.goTo('screen-sub'); 
+        else if(active === 'screen-result') this.goTo('screen-sub');
         else this.goTo('screen-main');
     },
 
