@@ -79,3 +79,33 @@ h2 { font-family: 'Fredoka One'; font-size: 3rem; margin-bottom: 30px; text-alig
 .feedback { font-size: 2.2rem; font-family: 'Fredoka One'; text-align: center; margin-top: 15px; min-height: 50px; transition: 0.2s; width: 100%; }
 .shake-anim { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; color: var(--danger) !important; }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px); } 50% { transform: translateX(15px); } 75% { transform: translateX(-15px); } }
+
+.result-screen { justify-content: center; min-height: calc(100vh - 90px); padding: 30px 20px; }
+.result-card { width: min(92vw, 760px); background: #FFFFFF; border: 6px solid #DBEAFE; border-radius: 38px; padding: 36px 28px; text-align: center; box-shadow: 0 22px 45px rgba(37, 99, 235, 0.18); position: relative; overflow: hidden; animation: resultPop 0.45s cubic-bezier(.17,.89,.32,1.35); }
+.result-card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at top left, rgba(251, 191, 36, .22), transparent 34%), radial-gradient(circle at bottom right, rgba(16, 185, 129, .18), transparent 34%); pointer-events: none; }
+.result-badge { font-size: clamp(4rem, 10vw, 7rem); line-height: 1; margin-bottom: 10px; filter: drop-shadow(0 10px 12px rgba(0,0,0,.16)); animation: trophyBounce 1.1s ease infinite alternate; position: relative; }
+#result-title { color: var(--success); font-size: clamp(2.4rem, 7vw, 4.4rem); margin: 10px 0 12px; position: relative; }
+#result-message { font-size: clamp(1.35rem, 3.5vw, 2rem); line-height: 1.35; margin: 0 auto 20px; max-width: 620px; color: #334155; position: relative; }
+.result-stars { display: flex; justify-content: center; gap: 14px; font-size: clamp(3rem, 8vw, 5.6rem); margin: 18px 0; position: relative; }
+.result-stars span { display: inline-block; animation: starWin 0.85s ease both; }
+.result-stars span:nth-child(2) { animation-delay: .12s; }
+.result-stars span:nth-child(3) { animation-delay: .24s; }
+.result-total { display: inline-block; background: #F8FAFC; border: 4px solid #E2E8F0; border-radius: 22px; padding: 14px 24px; font-size: clamp(1.25rem, 3vw, 1.8rem); margin-bottom: 22px; position: relative; }
+.result-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; position: relative; }
+.btn-result { border: none; border-radius: 26px; padding: 18px 28px; min-width: 220px; min-height: 64px; font-family: 'Fredoka One'; font-size: clamp(1.25rem, 3vw, 1.7rem); cursor: pointer; transition: .12s; }
+.btn-result-next { background: var(--success); color: white; box-shadow: 0 8px 0 var(--success-shadow); }
+.btn-result-menu { background: var(--primary); color: white; box-shadow: 0 8px 0 var(--primary-shadow); }
+.btn-result:active { transform: translateY(8px); box-shadow: 0 0 0; }
+.confetti-layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 9999; }
+.confetti-piece { position: absolute; top: -20px; width: 14px; height: 20px; border-radius: 4px; animation: confettiFall linear forwards; }
+.score-bump { animation: scoreBump .42s ease; display: inline-block; }
+.feedback-success-pop { animation: successPop .35s ease; }
+button, .btn-menu, .btn-back, .btn-reset, .btn-check, .btn-next, .btn-result { min-height: 56px; }
+.btn-menu, .btn-reset, .btn-check, .btn-next, .btn-back { line-height: 1.15; }
+@media (max-width: 700px) { .top-bar { padding: 14px 16px; font-size: 1.35rem; } .btn-back { font-size: 1.05rem; padding: 10px 14px; } .screen { padding: 24px 14px; } h1 { font-size: 2.35rem; margin-bottom: 24px; } h2 { font-size: 2.05rem; } .instruction { font-size: 1.45rem; padding: 18px; } .instruction b { font-size: 1.8rem; } .grid-2x2 { grid-template-columns: 1fr; gap: 22px; } .btn-menu { font-size: 1.75rem; padding: 24px 12px; } .feedback { font-size: 1.55rem; } .actions-container { gap: 14px; } .btn-reset, .btn-check, .btn-next { font-size: 1.25rem; padding: 17px; } }
+@keyframes resultPop { from { opacity: 0; transform: scale(.82) translateY(25px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes trophyBounce { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(-10px) rotate(3deg); } }
+@keyframes starWin { 0% { transform: scale(0) rotate(-90deg); opacity: 0; } 65% { transform: scale(1.28) rotate(12deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes confettiFall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+@keyframes scoreBump { 0% { transform: scale(1); } 50% { transform: scale(1.55); } 100% { transform: scale(1); } }
+@keyframes successPop { from { transform: scale(.9); opacity: .7; } to { transform: scale(1); opacity: 1; } }
