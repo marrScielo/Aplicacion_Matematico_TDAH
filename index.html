@@ -41,6 +41,22 @@
             <button class="btn-next" id="btn-next">¡Siguiente Reto!</button>
         </div>
     </div>
+    <div id="screen-result" class="screen result-screen" aria-live="polite">
+        <div class="result-card">
+            <div class="result-badge">🏆</div>
+            <h2 id="result-title">¡Reto completado!</h2>
+            <p id="result-message">Ganaste una estrella por tu esfuerzo.</p>
+            <div class="result-stars" id="result-stars" aria-label="Estrellas ganadas">
+                <span>⭐</span><span>⭐</span><span>⭐</span>
+            </div>
+            <div class="result-total">Total acumulado: <strong>⭐ <span id="result-score">0</span></strong></div>
+            <div class="result-actions">
+                <button class="btn-result btn-result-next" id="btn-result-next">Siguiente reto</button>
+                <button class="btn-result btn-result-menu" id="btn-result-menu">Volver a juegos</button>
+            </div>
+        </div>
+    </div>
+    <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
 </div>
 
 <script src="js/firebase-config.js"></script>
