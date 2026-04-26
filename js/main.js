@@ -31,7 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-reset').onclick = () => Effects.resetLevel();
     document.getElementById('btn-check').onclick = () => { if(checkLogic) checkLogic(); };
     document.getElementById('btn-next').onclick = () => Navigation.restartGame();
-
+    document.getElementById('btn-result-next').onclick = () => { Navigation.restartGame(); Navigation.goTo('screen-game'); };
+    document.getElementById('btn-result-menu').onclick = () => Navigation.goTo('screen-sub');
+    Effects.attachGlobalClickSound();
+    
     // Eventos del Menú Principal
     document.querySelectorAll('.btn-menu[data-op]').forEach(btn => {
         btn.onclick = () => Navigation.showMenu(btn.dataset.op);
