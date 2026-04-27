@@ -40,3 +40,23 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.onclick = () => Navigation.showMenu(btn.dataset.op);
     });
 });
+
+window.addEventListener('load', () => {
+    const splash = document.getElementById('splash-screen');
+    const bar = document.querySelector('.loading-bar');
+    let width = 0;
+
+    const interval = setInterval(() => {
+        width += Math.random() * 10;
+        if (width >= 100) {
+            width = 100;
+            clearInterval(interval);
+            
+            // Esperamos un momento con la barra llena para dar satisfacción visual
+            setTimeout(() => {
+                splash.classList.add('splash-hidden');
+            }, 500);
+        }
+        bar.style.width = width + '%';
+    }, 100);
+});
