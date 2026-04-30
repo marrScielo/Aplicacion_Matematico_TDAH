@@ -5,6 +5,10 @@ const Navigation = {
         this.screens.forEach(s => document.getElementById(s).classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('btn-back').style.display = id === 'screen-main' ? 'none' : 'block';
+
+        if (window.AppUX && typeof window.AppUX.setFocusMode === 'function') {
+            window.AppUX.setFocusMode(id === 'screen-game');
+        }
     },
 
     back() {
@@ -22,7 +26,14 @@ const Navigation = {
         d.games.forEach(g => {
             let b = document.createElement('button'); b.className = `btn-menu ${d.color}`;
             b.innerText = g.n; 
-            b.onclick = () => { currentInitFunc = g.f; this.restartGame(); this.goTo('screen-game'); };
+            b.onclick = () => {
+                currentInitFunc = g.f;
+                if (window.AppUX && typeof window.AppUX.startBlock === 'function') {
+                    window.AppUX.startBlock();
+                }
+                this.restartGame();
+                this.goTo('screen-game');
+            };
             list.appendChild(b);
         });
         this.goTo('screen-sub');
