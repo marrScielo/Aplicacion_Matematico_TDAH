@@ -1,5 +1,6 @@
 const Effects = {
     audioCtx: null,
+    muted: false,
     
     getAudioContext() {
         if (!this.audioCtx) {
@@ -11,6 +12,7 @@ const Effects = {
     },
 
     playTone(frequency = 440, duration = 0.12, type = 'sine', volume = 0.08) {
+        if (this.muted) return;
         const ctx = this.getAudioContext();
         if (!ctx) return;
         const osc = ctx.createOscillator();
@@ -91,6 +93,10 @@ const Effects = {
     win(msg) {
         points++; 
         document.getElementById('score').innerText = points;
+
+        if (window.AppUX && typeof window.AppUX.onExerciseWin === 'function') {
+            window.AppUX.onExerciseWin();
+        }
         
         const fb = document.getElementById('game-feedback');
         fb.innerText = '¡Excelente! ' + msg;
@@ -146,7 +152,14 @@ const Effects = {
 
     attachGlobalClickSound() {
         document.addEventListener('click', (event) => {
-            if (event.target.closest('button')) this.soundClick();
+            const btn = event.target.closest('button');
+            if (!btn) return;
+            if (btn.closest('[data-no-sound="1"]')) return;
+            if (btn.getAttribute('data-no-sound') === '1') return;
+            this.soundClick();
         }, true);
     }
 };
+
+// Expose for other modules (e.g., accessibility.js mute toggle)
+window.Effects = Effects;

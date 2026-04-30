@@ -59,6 +59,10 @@ function setupUI(msg) {
     document.getElementById('game-top').innerHTML = '';
     document.getElementById('game-bot').innerHTML = '';
     gameState = { targets: [] };
+
+    if (window.AppUX && typeof window.AppUX.onNewInstruction === 'function') {
+        window.AppUX.onNewInstruction(msg);
+    }
 }
 
 function createTargetNode(tClass, icon) {

@@ -16,8 +16,11 @@
 <div class="app">
     <div class="top-bar">
         <button class="btn-back" id="btn-back" style="display:none;">◀ Volver</button>
-        <span>MathADHD</span>
-        <span>⭐ <span id="score">0</span></span>
+        <span class="top-title">MathADHD</span>
+        <div class="top-actions">
+            <button class="btn-icon" id="btn-settings" data-no-sound="1" aria-label="Configuracion de voz" title="Configuracion de voz">⚙</button>
+            <span class="top-score" aria-label="Estrellas">⭐ <span id="score">0</span></span>
+        </div>
     </div>
 
     <div id="screen-main" class="screen active">
@@ -36,6 +39,12 @@
     </div>
 
     <div id="screen-game" class="screen">
+        <div class="block-progress" aria-label="Progreso del bloque">
+            <div class="block-progress-track" id="block-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
+                <div class="block-progress-fill" id="block-progress-fill"></div>
+            </div>
+            <div class="block-progress-text" id="block-progress-text">0/5</div>
+        </div>
         <div class="instruction" id="game-instr"></div>
         <div id="game-top" class="game-area area-top"></div>
         <div id="game-bot" class="game-area area-bot"></div>
@@ -63,6 +72,21 @@
         </div>
     </div>
     <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
+
+    <div id="settings-modal" class="settings-modal" aria-hidden="true">
+        <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+            <div class="settings-title" id="settings-title">Voz</div>
+            <div class="settings-row">
+                <span class="settings-label">Sonido y voz</span>
+                <button class="settings-toggle" id="voice-toggle" data-no-sound="1" type="button" aria-pressed="true">
+                    <span class="toggle-knob" aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="settings-actions">
+                <button class="btn-simple" id="settings-close" data-no-sound="1" type="button">Cerrar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="js/firebase-config.js"></script>
