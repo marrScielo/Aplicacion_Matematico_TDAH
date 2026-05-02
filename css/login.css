@@ -1,0 +1,124 @@
+/* CENTRAR TODO */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.cerrar {
+  background: #f44336;
+  color: white;
+}
+.cerrar:hover {
+  transform: scale(1.05);
+  background: #d32f2f;
+}
+
+/* CONTENEDOR */
+.login-container {
+  width: 400px;
+  padding: 40px;
+  background: white;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* TITULO */
+.login-container h1 {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+/* SUBTITULO */
+.subtitle {
+  font-size: 18px;
+  margin-bottom: 25px;
+  color: #444;
+}
+
+/* INPUT */
+#username {
+  width: 100%;
+  padding: 15px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 2px solid #ccc;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+/* BOTONES */
+.buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+/* ESTILO GENERAL BOTÓN */
+.btn {
+  padding: 15px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* INGRESAR */
+.ingresar {
+  background: #4CAF50;
+  color: white;
+}
+
+.ingresar:hover {
+  transform: scale(1.05);
+}
+
+/* REGISTRAR */
+.registrar {
+  background: #FF9800;
+  color: white;
+}
+
+.registrar:hover {
+  transform: scale(1.05);
+}
+
+/* ERROR */
+#error {
+  margin-top: 15px;
+  font-weight: bold;
+}
+/* BOTÓN BASE MEJORADO */
+.btn {
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* BOTÓN SALIR PRO */
+.cerrar {
+  background: linear-gradient(135deg, #ff4e50, #f9d423);
+  color: white;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* HOVER SUAVE */
+.cerrar:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+/* CLICK */
+.cerrar:active {
+  transform: scale(0.95);
+}
