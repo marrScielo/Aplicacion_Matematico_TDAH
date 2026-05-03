@@ -1,139 +1,143 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MathADHD - Interfaz Adaptativa</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/login.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <script>
-        if (localStorage.getItem("auth") !== "true") {window.location.href = "login.html";}
-    </script>
-    
+  <meta charset="UTF-8">
+  <title>Login - MathADHD</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
-<div class="app">
-    <div class="top-bar">
-        <button class="btn-back" id="btn-back" style="display:none;">◀ Volver</button>
-        <span class="top-title">MathADHD</span>
-        <div class="top-actions">
-            <button class="btn-icon" id="btn-settings" data-no-sound="1" aria-label="Configuracion de voz" title="Configuracion de voz">⚙</button>
-            <span class="top-score" aria-label="Estrellas">⭐ <span id="score">0</span></span>
-        </div>
-        
-        <button class="btn cerrar" onclick="logout()">🚪 Salir</button>
-        <script>
-            function logout() 
-            {localStorage.removeItem("auth"); window.location.href = "login.html";}
-        </script>
-    </div>
 
-    <div id="screen-main" class="screen active">
-        <h1>Misión Espacial Matemática</h1>
-        <div class="grid-2x2">
-            <button class="btn-menu c-add" data-op="add"><span style="font-size:5rem;">➕</span>Sumar</button>
-            <button class="btn-menu c-sub" data-op="sub"><span style="font-size:5rem;">➖</span>Restar</button>
-            <button class="btn-menu c-mul" data-op="mul"><span style="font-size:5rem;">✖️</span>Multiplicar</button>
-            <button class="btn-menu c-div" data-op="div"><span style="font-size:5rem;">➗</span>Dividir</button>
-        </div>
-    </div>
+<div class="login-container">
+  <h1>🎮 MathADHD</h1>
+  <p class="subtitle">¡Ingresa tu nombre para jugar!</p>
 
-    <div id="screen-sub" class="screen">
-        <h2 id="sub-title">Elige tu Reto</h2>
-        <div class="grid-2x2" id="sub-list"></div>
-    </div>
+  <input type="text" id="username" placeholder="Tu nombre">
 
-    <div id="screen-game" class="screen">
-        <div class="block-progress" aria-label="Progreso del bloque">
-            <div class="block-progress-track" id="block-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
-                <div class="block-progress-fill" id="block-progress-fill"></div>
-            </div>
-            <div class="block-progress-text" id="block-progress-text">0/5</div>
-        </div>
-        <div class="instruction" id="game-instr"></div>
-        <div id="game-top" class="game-area area-top"></div>
-        <div id="game-bot" class="game-area area-bot"></div>
-        <div id="game-feedback" class="feedback"></div>
-        
-        <div class="actions-container" id="actions-container">
-            <button class="btn-reset" id="btn-reset">↻ Devolver Todo</button>
-            <button class="btn-check" id="btn-check">¡Comprobar Respuesta!</button>
-            <button class="btn-next" id="btn-next">¡Siguiente Reto!</button>
-        </div>
-    </div>
-    <div id="screen-result" class="screen result-screen" aria-live="polite">
-        <div class="result-card">
-            <div class="result-badge">🏆</div>
-            <h2 id="result-title">¡Reto completado!</h2>
-            <p id="result-message">Ganaste una estrella por tu esfuerzo.</p>
-            <div class="result-stars" id="result-stars" aria-label="Estrellas ganadas">
-                <span>⭐</span><span>⭐</span><span>⭐</span>
-            </div>
-            <div class="result-total">Total acumulado: <strong>⭐ <span id="result-score">0</span></strong></div>
-            <div class="result-actions">
-                <button class="btn-result btn-result-next" id="btn-result-next">Siguiente reto</button>
-                <button class="btn-result btn-result-menu" id="btn-result-menu">Volver a juegos</button>
-            </div>
-        </div>
-    </div>
-    <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
+  <div class="buttons">
+    <button class="btn ingresar" onclick="login()">Ingresar</button>
+    <button class="btn registrar" onclick="registrar()">Registrar</button>
+  </div>
 
-    <div id="settings-modal" class="settings-modal" aria-hidden="true">
-        <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-            <div class="settings-title" id="settings-title">Voz</div>
-            <div class="settings-row">
-                <span class="settings-label">Sonido y voz</span>
-                <button class="settings-toggle" id="voice-toggle" data-no-sound="1" type="button" aria-pressed="true">
-                    <span class="toggle-knob" aria-hidden="true"></span>
-                </button>
-            </div>
-            <div class="settings-actions">
-                <button class="btn-simple" id="settings-close" data-no-sound="1" type="button">Cerrar</button>
-            </div>
-        </div>
-    </div>
+  <p id="error"></p>
 </div>
 
-<script src="js/firebase-config.js"></script>
-<script src="js/auth-manager.js"></script>   
-<script src="js/accessibility.js"></script>
-<script src="js/effects-qa.js"></script>
-<script src="js/game-logic.js"></script>
-<script src="js/navigation.js"></script>
-<script src="js/main.js"></script>
+<script type="module">
 
+// 🔥 IMPORTS FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<div id="splash-screen" class="splash-overlay">
-    <div class="splash-content">
-        <div class="rocket-wrapper">
-            <div class="rocket-container">
-                <div class="rocket-body">
-                    <div class="rocket-window"></div>
-                </div>
-                <div class="rocket-fin fin-left"></div>
-                <div class="rocket-fin fin-right"></div>
-                <div class="rocket-fire"></div>
-            </div>
-            <div class="smoke-particles">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
+// 🔥 CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyC2cBewSZrETvRMwUq4TLrTFrcfgsArxn8",
+  authDomain: "math-tdah-app.firebaseapp.com",
+  projectId: "math-tdah-app",
+  storageBucket: "math-tdah-app.firebasestorage.app",
+  messagingSenderId: "123946867099",
+  appId: "1:123946867099:web:792ca657f32f2e7963293e"
+};
 
-        <h2 class="loading-text">Preparando misión matemática...</h2>
-        
-        <div class="loading-bar-container">
-            <div class="loading-bar"></div>
-        </div>
-    </div>
-</div>
+// 🔥 INICIALIZACIÓN (ORDEN CORRECTO)
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// 🔥 ELEMENTOS
+const input = document.getElementById("username");
+const error = document.getElementById("error");
+
+// 🔥 VALIDACIÓN SOLO LETRAS EN TIEMPO REAL
+input.addEventListener("input", () => {
+  input.value = input.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, "");
+});
+
+// 🔥 VALIDAR NOMBRE
+function nombreValido(nombre) {
+  const regex = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/;
+  return regex.test(nombre);
+}
+
+// 🔥 NORMALIZAR (EVITA DUPLICADOS)
+function normalizar(nombre) {
+  return nombre.toLowerCase().trim();
+}
+
+// 🔐 LOGIN
+window.login = async function() {
+  error.innerText = "";
+  const username = input.value.trim();
+
+  if (username === "") {
+    error.innerText = "Ingresa un nombre";
+    return;
+  }
+
+  if (!nombreValido(username)) {
+    error.innerText = "Nombre inválido";
+    return;
+  }
+
+  try {
+    const userRef = doc(db, "usuarios", normalizar(username));
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      error.innerText = "Usuario no registrado";
+      return;
+    }
+
+    await signInAnonymously(auth);
+
+    localStorage.setItem("username", username);
+    localStorage.setItem("auth", "true");
+
+    window.location.href = "index.html";
+
+  } catch (e) {
+    error.innerText = "Error: " + e.message;
+  }
+};
+
+// 📝 REGISTRO
+window.registrar = async function() {
+  error.innerText = "";
+  const username = input.value.trim();
+
+  if (username === "") {
+    error.innerText = "Ingresa un nombre";
+    return;
+  }
+
+  if (!nombreValido(username)) {
+    error.innerText = "Solo letras y espacios";
+    return;
+  }
+
+  try {
+    const userRef = doc(db, "usuarios", normalizar(username));
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      error.innerText = "El usuario ya existe";
+      return;
+    }
+
+    await setDoc(userRef, {
+      nombre: username,
+      creado: new Date()
+    });
+
+    error.style.color = "green";
+    error.innerText = "Usuario registrado correctamente ✅";
+
+  } catch (e) {
+    error.innerText = "Error: " + e.message;
+  }
+};
+
+</script>
 
 </body>
-
-
 </html>
