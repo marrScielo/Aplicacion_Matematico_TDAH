@@ -103,7 +103,7 @@ function initDrag(name, emoji, tClass, icon) {
     document.getElementById('game-top').appendChild(targetData.wrap); 
     gameState.targets.push(targetData);
     createDraggables(t+4, emoji); 
-    checkLogic = () => {
+    window.checkLogic = () => {
         let count = gameState.targets[0].drop.querySelectorAll('.drag-item').length;
         if(count === t) Effects.win(`Lograste ${t}.`);
         else Effects.fail(`Hay ${count}, faltan/sobran.`);
@@ -119,7 +119,7 @@ function initDragSub(emoji, tClass, icon) {
     document.getElementById('game-top').appendChild(targetData.wrap); 
     gameState.targets.push(targetData);
     createDraggables(total, emoji);
-    checkLogic = () => {
+    window.checkLogic = () => {
         let currentLeft = document.getElementById('game-bot').querySelectorAll('.drag-item').length;
         if(currentLeft === target) Effects.win(`${total} - ${toSub} = ${target}.`);
         else Effects.fail(`Quedan ${currentLeft}. Deben quedar ${target}.`);
@@ -144,7 +144,7 @@ function initDestroy(emoji) {
         };
         bot.appendChild(item);
     }
-    checkLogic = () => {
+    window.checkLogic = () => {
         let currentLeft = total - gameState.destroyed;
         if(currentLeft === target) Effects.win(`${total} - ${toSub} = ${target}.`);
         else Effects.fail(`Quedan ${currentLeft}. ¡Faltan destruir!`);
@@ -163,7 +163,7 @@ function initCloner() {
         g.style.fontSize='3rem'; document.getElementById('game-top').appendChild(g);
     };
     bot.appendChild(btn);
-    checkLogic = () => {
+    window.checkLogic = () => {
         if(gameState.cloned === tms) Effects.win(`${grp} x ${tms} = ${grp*tms}.`);
         else Effects.fail(`Llevas ${gameState.cloned}, faltan.`);
     };
@@ -183,7 +183,7 @@ function initGrid() {
     let bCol = document.createElement('button'); bCol.className='btn-check'; bCol.innerText='+ Col'; bCol.onclick=()=>{if(gameState.c<5) gameState.c++; updateGrid();};
     document.getElementById('game-bot').appendChild(bRow); document.getElementById('game-bot').appendChild(bCol);
     updateGrid();
-    checkLogic = () => {
+    window.checkLogic = () => {
         if(gameState.r===rows && gameState.c===cols) Effects.win(`¡Perfecto! ${rows}x${cols}`);
         else Effects.fail(`Es ${gameState.r}x${gameState.c}.`);
     };
@@ -198,7 +198,7 @@ function initDragMul(name, emoji, tClass, icon) {
         gameState.targets.push(td);
     }
     createDraggables(groups*perGroup + 2, emoji);
-    checkLogic = () => {
+    window.checkLogic = () => {
         let ok = gameState.targets.every(td => td.drop.querySelectorAll('.drag-item').length === perGroup);
         if(ok) Effects.win(`${groups} x ${perGroup}`);
         else Effects.fail(`Revisa las cantidades.`);
@@ -214,7 +214,7 @@ function initDragDiv(name, emoji, tClass, icon) {
         gameState.targets.push(td);
     }
     createDraggables(total, emoji);
-    checkLogic = () => {
+    window.checkLogic = () => {
         let count = gameState.targets[0].drop.querySelectorAll('.drag-item').length;
         let ok = gameState.targets.every(td => td.drop.querySelectorAll('.drag-item').length === count);
         let sum = 0; gameState.targets.forEach(td => sum += td.drop.querySelectorAll('.drag-item').length);
@@ -222,3 +222,12 @@ function initDragDiv(name, emoji, tClass, icon) {
         else Effects.fail(`No están iguales o faltan piezas.`);
     };
 }
+// Al final de js/game-logic.js
+window.initDrag = initDrag;
+window.initDragSub = initDragSub;
+window.initDragMul = initDragMul;
+window.initDragDiv = initDragDiv;
+window.initDestroy = initDestroy;
+window.initCloner = initCloner;
+window.initGrid = initGrid;
+
