@@ -1,4 +1,4 @@
-const Navigation = {
+const Navigation = { // En el index.html
     screens: ['screen-main', 'screen-sub', 'screen-game', 'screen-result'],
 
     goTo(id) {
@@ -44,3 +44,5 @@ const Navigation = {
         if(currentInitFunc) currentInitFunc();
     }
 };
+// Al final de js/navigation.js
+window.Navigation = Navigation;
