@@ -8,8 +8,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/login.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <script>
+        if (localStorage.getItem("auth") !== "true") {window.location.href = "login.html";}
+    </script>
     
 </head>
 <body>
@@ -21,6 +26,12 @@
             <button class="btn-icon" id="btn-settings" data-no-sound="1" aria-label="Configuracion de voz" title="Configuracion de voz">⚙</button>
             <span class="top-score" aria-label="Estrellas">⭐ <span id="score">0</span></span>
         </div>
+        
+        <button class="btn cerrar" onclick="logout()">🚪 Salir</button>
+        <script>
+            function logout() 
+            {localStorage.removeItem("auth"); window.location.href = "login.html";}
+        </script>
     </div>
 
     <div id="screen-main" class="screen active">

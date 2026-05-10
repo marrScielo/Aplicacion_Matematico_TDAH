@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - MathADHD</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+
+<div class="login-container">
+  <h1>🎮 MathADHD</h1>
+  <p class="subtitle">¡Ingresa tu nombre para jugar!</p>
+
+  <input type="text" id="username" placeholder="Tu nombre">
+
+  <div class="buttons">
+    <button class="btn ingresar" onclick="login()">Ingresar</button>
+    <button class="btn registrar" onclick="registrar()">Registrar</button>
+  </div>
+
+  <p id="error"></p>
+</div>
+
+<script type="module">
+
+// 🔥 IMPORTS FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// 🔥 CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyC2cBewSZrETvRMwUq4TLrTFrcfgsArxn8",
+  authDomain: "math-tdah-app.firebaseapp.com",
+  projectId: "math-tdah-app",
+  storageBucket: "math-tdah-app.firebasestorage.app",
+  messagingSenderId: "123946867099",
+  appId: "1:123946867099:web:792ca657f32f2e7963293e"
+};
+
+// 🔥 INICIALIZACIÓN (ORDEN CORRECTO)
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// 🔥 ELEMENTOS
+const input = document.getElementById("username");
+const error = document.getElementById("error");
+
+// 🔥 VALIDACIÓN SOLO LETRAS EN TIEMPO REAL
+input.addEventListener("input", () => {
+  input.value = input.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ\s]/g, "");
+});
+
+// 🔥 VALIDAR NOMBRE
+function nombreValido(nombre) {
+  const regex = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/;
+  return regex.test(nombre);
+}
+
+// 🔥 NORMALIZAR (EVITA DUPLICADOS)
+function normalizar(nombre) {
+  return nombre.toLowerCase().trim();
+}
+
+// 🔐 LOGIN
+window.login = async function() {
+  error.innerText = "";
+  const username = input.value.trim();
+
+  if (username === "") {
+    error.innerText = "Ingresa un nombre";
+    return;
+  }
+
+  if (!nombreValido(username)) {
+    error.innerText = "Nombre inválido";
+    return;
+  }
+
+  try {
+    const userRef = doc(db, "usuarios", normalizar(username));
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      error.innerText = "Usuario no registrado";
+      return;
+    }
+
+    await signInAnonymously(auth);
+
+    localStorage.setItem("username", username);
+    localStorage.setItem("auth", "true");
+
+    window.location.href = "index.html";
+
+  } catch (e) {
+    error.innerText = "Error: " + e.message;
+  }
+};
+
+// 📝 REGISTRO
+window.registrar = async function() {
+  error.innerText = "";
+  const username = input.value.trim();
+
+  if (username === "") {
+    error.innerText = "Ingresa un nombre";
+    return;
+  }
+
+  if (!nombreValido(username)) {
+    error.innerText = "Solo letras y espacios";
+    return;
+  }
+
+  try {
+    const userRef = doc(db, "usuarios", normalizar(username));
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      error.innerText = "El usuario ya existe";
+      return;
+    }
+
+    await setDoc(userRef, {
+      nombre: username,
+      creado: new Date()
+    });
+
+    error.style.color = "green";
+    error.innerText = "Usuario registrado correctamente ✅";
+
+  } catch (e) {
+    error.innerText = "Error: " + e.message;
+  }
+};
+
+</script>
+
+</body>
+</html>
