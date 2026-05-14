@@ -1,10 +1,12 @@
+import { guardarEstrellas } from './auth-manager.js';
 // Estado Global Interno
-let points = 0;
+window.points= 0;
 let currentInitFunc = null; 
 let checkLogic = null;
 let gameState = {};
 let dragged = null;
 let ox = 0, oy = 0;
+const puntosGanados = 1;
 
 const randomMsg = (msgs) => msgs[Math.floor(Math.random() * msgs.length)];
 
@@ -104,10 +106,13 @@ function initDrag(name, emoji, tClass, icon) {
     gameState.targets.push(targetData);
     createDraggables(t+4, emoji); 
     window.checkLogic = () => {
-        let count = gameState.targets[0].drop.querySelectorAll('.drag-item').length;
-        if(count === t) Effects.win(`Lograste ${t}.`);
-        else Effects.fail(`Hay ${count}, faltan/sobran.`);
-    };
+    let count = gameState.targets[0].drop.querySelectorAll('.drag-item').length;
+    if(count === t) {
+        window.misionCumplida(`¡Misión cumplida! Lograste ${t}.`);
+    } else {
+        Effects.fail(`Hay ${count}, faltan/sobran.`);
+    }
+};
 }
 
 function initDragSub(emoji, tClass, icon) {
@@ -120,10 +125,13 @@ function initDragSub(emoji, tClass, icon) {
     gameState.targets.push(targetData);
     createDraggables(total, emoji);
     window.checkLogic = () => {
-        let currentLeft = document.getElementById('game-bot').querySelectorAll('.drag-item').length;
-        if(currentLeft === target) Effects.win(`${total} - ${toSub} = ${target}.`);
-        else Effects.fail(`Quedan ${currentLeft}. Deben quedar ${target}.`);
-    };
+    let currentLeft = document.getElementById('game-bot').querySelectorAll('.drag-item').length;
+    if(currentLeft === target) {
+        window.misionCumplida(`${total} - ${toSub} = ${target}.`); 
+    } else {
+        Effects.fail(`Quedan ${currentLeft}. Deben quedar ${target}.`);
+    }
+};
 }
 
 function initDestroy(emoji) {
@@ -164,9 +172,12 @@ function initCloner() {
     };
     bot.appendChild(btn);
     window.checkLogic = () => {
-        if(gameState.cloned === tms) Effects.win(`${grp} x ${tms} = ${grp*tms}.`);
-        else Effects.fail(`Llevas ${gameState.cloned}, faltan.`);
-    };
+    if(gameState.cloned === tms) {
+        window.misionCumplida(`${grp} x ${tms} = ${grp*tms}.`); 
+    } else {
+        Effects.fail(`Llevas ${gameState.cloned}, faltan.`);
+    }
+};
 }
 
 function initGrid() {
@@ -222,6 +233,26 @@ function initDragDiv(name, emoji, tClass, icon) {
         else Effects.fail(`No están iguales o faltan piezas.`);
     };
 }
+
+
+function misionCumplida(mensaje) {
+    // 1. Mostrar efectos visuales (confeti y mensaje)
+    if (window.Effects && window.Effects.win) {
+        window.Effects.win(mensaje);
+    }
+    const resultScore = document.getElementById('result-score');
+    if (resultScore) resultScore.innerText = window.points;
+   try {
+        guardarEstrellas(puntosGanados); // puntosGanados vale 1
+        console.log("Sincronizando 1 estrella...");
+    } catch (error) {
+        console.error("Error al guardar:", error);
+    }
+}
+
+// Asegurarla en el objeto global window
+window.misionCumplida = misionCumplida;
+
 // Al final de js/game-logic.js
 window.initDrag = initDrag;
 window.initDragSub = initDragSub;
@@ -230,4 +261,5 @@ window.initDragDiv = initDragDiv;
 window.initDestroy = initDestroy;
 window.initCloner = initCloner;
 window.initGrid = initGrid;
+window.misionCumplida = misionCumplida;
 

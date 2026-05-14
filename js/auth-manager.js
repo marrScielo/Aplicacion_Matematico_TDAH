@@ -26,13 +26,25 @@ export async function loginAutomatico() {
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-            await setDoc(userRef, {
+            // Documento inicial para nuevos usuarios
+            const nuevoUsuario = {
                 nombre: "Astronauta Nuevo", 
                 puntaje: 0,
                 nivel: 1,
                 creado: new Date() 
-            });
+            };
+            await setDoc(userRef, nuevoUsuario);
+            window.points = 0;
+        } else {
+            const data = userSnap.data();
+            // Cargamos el puntaje desde Firestore a la variable global
+            window.points = data.puntaje || 0; 
+            console.log("🚀 Puntaje cargado de Firebase:", window.points);
         }
+
+        // Actualizamos la interfaz (la estrella dorada en el header)
+        const scoreElement = document.getElementById('score');
+        if (scoreElement) scoreElement.innerText = window.points;
 
         localStorage.setItem("uid", uid);
         return true;
@@ -42,9 +54,6 @@ export async function loginAutomatico() {
     }
 }
 
-/**
- * Incrementa las estrellas del usuario directamente en la base de datos de la nube.
- */
 export async function guardarEstrellas(puntosNuevos) {
     const uid = localStorage.getItem("uid");
     if (!uid) return;
@@ -52,7 +61,7 @@ export async function guardarEstrellas(puntosNuevos) {
     try {
         const userRef = doc(db, "usuarios", uid);
         await updateDoc(userRef, {
-            estrellas: increment(puntosNuevos)
+            puntaje: increment(puntosNuevos) 
         });
         console.log(`⭐ Sincronizadas +${puntosNuevos} estrellas en la nube.`);
     } catch (e) {

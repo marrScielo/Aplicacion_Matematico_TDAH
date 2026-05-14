@@ -74,7 +74,7 @@ const Effects = {
         const stars = document.querySelectorAll('#result-stars span');
 
         if (resultMessage) resultMessage.innerText = `¡Muy bien! ${msg} Ganaste una estrella por completar el reto.`;
-        if (resultScore) resultScore.innerText = points;
+        if (resultScore) resultScore.innerText = window.points || 0;
 
         stars.forEach(star => {
             star.style.animation = 'none';
@@ -91,8 +91,11 @@ const Effects = {
     },
     
     win(msg) {
-        points++; 
-        document.getElementById('score').innerText = points;
+       
+        window.points++;
+
+        const scoreElement = document.getElementById('score');
+        if (scoreElement) scoreElement.innerText = window.points;
 
         if (window.AppUX && typeof window.AppUX.onExerciseWin === 'function') {
             window.AppUX.onExerciseWin();

@@ -40,6 +40,14 @@ const Navigation = { // En el index.html
     },
 
     restartGame() {
+    
+        let progreso = 0;
+        if (window.points >= 5) {
+        this.goTo('screen-result');
+        return; 
+    }
+
+
         Effects.clear();
         if(currentInitFunc) currentInitFunc();
     }
