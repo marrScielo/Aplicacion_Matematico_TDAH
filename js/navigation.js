@@ -1,10 +1,23 @@
-const Navigation = { // En el index.html
+const Navigation = {
     screens: ['screen-main', 'screen-sub', 'screen-game', 'screen-result'],
 
     goTo(id) {
-        this.screens.forEach(s => document.getElementById(s).classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('btn-back').style.display = id === 'screen-main' ? 'none' : 'block';
+        // Ocultar TODAS las pantallas primero
+        this.screens.forEach(s => {
+            const el = document.getElementById(s);
+            if (el) el.classList.remove('active');
+        });
+
+        // Mostrar solo la pantalla destino
+        const target = document.getElementById(id);
+        if (target) target.classList.add('active');
+
+        // Botón volver
+        const btnBack = document.getElementById('btn-back');
+        if (btnBack) btnBack.style.display = id === 'screen-main' ? 'none' : 'block';
+
+        // Scroll al tope al cambiar de pantalla
+        window.scrollTo(0, 0);
 
         if (window.AppUX && typeof window.AppUX.setFocusMode === 'function') {
             window.AppUX.setFocusMode(id === 'screen-game');
@@ -12,20 +25,28 @@ const Navigation = { // En el index.html
     },
 
     back() {
-        let active = document.querySelector('.screen.active').id;
-        if(active === 'screen-game') this.goTo('screen-sub'); 
-        else if(active === 'screen-result') this.goTo('screen-sub');
+        const active = document.querySelector('.screen.active');
+        if (!active) { this.goTo('screen-main'); return; }
+        if (active.id === 'screen-game') this.goTo('screen-sub');
+        else if (active.id === 'screen-result') this.goTo('screen-sub');
         else this.goTo('screen-main');
     },
 
     showMenu(op) {
-        let d = DB[op];
+        // Usar window.DB para asegurar que main.js ya lo cargó
+        const d = window.DB?.[op];
+        if (!d) { console.error('DB no listo aún para:', op); return; }
+
         document.getElementById('sub-title').innerText = d.title;
         document.getElementById('sub-title').className = d.color;
-        let list = document.getElementById('sub-list'); list.innerHTML = '';
+
+        const list = document.getElementById('sub-list');
+        list.innerHTML = '';
+
         d.games.forEach(g => {
-            let b = document.createElement('button'); b.className = `btn-menu ${d.color}`;
-            b.innerText = g.n; 
+            const b = document.createElement('button');
+            b.className = `btn-menu ${d.color}`;
+            b.innerText = g.n;
             b.onclick = () => {
                 currentInitFunc = g.f;
                 if (window.AppUX && typeof window.AppUX.startBlock === 'function') {
@@ -36,21 +57,18 @@ const Navigation = { // En el index.html
             };
             list.appendChild(b);
         });
+
         this.goTo('screen-sub');
     },
 
     restartGame() {
-    
-        let progreso = 0;
         if (window.points >= 5) {
-        this.goTo('screen-result');
-        return; 
-    }
-
-
+            this.goTo('screen-result');
+            return;
+        }
         Effects.clear();
-        if(currentInitFunc) currentInitFunc();
+        if (currentInitFunc) currentInitFunc();
     }
 };
-// Al final de js/navigation.js
+
 window.Navigation = Navigation;
