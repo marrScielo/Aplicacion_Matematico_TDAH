@@ -1,265 +1,334 @@
+/**
+ * game-logic.js  (ES module)
+ * ─────────────────────────────────────────────────────────
+ * Lógica de cada mini-juego. No guarda estado de navegación.
+ *
+ * CAMBIOS RESPECTO A LA VERSIÓN ANTERIOR:
+ *  1. Eliminadas: `let currentInitFunc`, `let checkLogic` locales.
+ *     → Ambas ahora viven en window.GS y window.checkLogic.
+ *  2. window.points eliminado → window.GS.totalPoints.
+ *  3. misionCumplida() ya no llama Effects.win() directamente:
+ *     eso lo hace cada checkLogic individual.
+ *     misionCumplida ES Effects.win (alias semántico).
+ *  4. resetLevel en effects-qa.js llama window.GS.currentInitFunc,
+ *     así que cada init ya no necesita guardarse a sí misma.
+ */
+
 import { guardarEstrellas } from './auth-manager.js';
-// Estado Global Interno
-window.points= 0;
-let currentInitFunc = null; 
-let checkLogic = null;
+
+/* ── Estado local del mini-juego en curso ── */
 let gameState = {};
-let dragged = null;
+let dragged   = null;
 let ox = 0, oy = 0;
-const puntosGanados = 1;
 
-const randomMsg = (msgs) => msgs[Math.floor(Math.random() * msgs.length)];
+const randomMsg = msgs => msgs[Math.floor(Math.random() * msgs.length)];
 
+/* ══════════════════════════════════════════════════════════
+   DRAG & DROP
+══════════════════════════════════════════════════════════ */
 function dragify(el, onDrop) {
     el.addEventListener('pointerdown', e => {
         e.preventDefault();
-        dragged = el;
+        dragged   = el;
         el.dropCb = onDrop;
-        let r = el.getBoundingClientRect();
+        const r   = el.getBoundingClientRect();
         ox = e.clientX - r.left;
         oy = e.clientY - r.top;
-        el.style.width = r.width + 'px';
-        el.style.height = r.height + 'px';
-        el.style.position = 'absolute';
-        el.style.left = (e.clientX - ox) + 'px';
-        el.style.top = (e.clientY - oy) + 'px';
+        el.style.cssText += `width:${r.width}px;height:${r.height}px;position:absolute;left:${e.clientX-ox}px;top:${e.clientY-oy}px;`;
         document.body.appendChild(el);
         el.classList.add('dragging');
         el.setPointerCapture(e.pointerId);
     });
 
     el.addEventListener('pointermove', e => {
-        if(dragged === el) {
+        if (dragged === el) {
             el.style.left = (e.clientX - ox) + 'px';
-            el.style.top = (e.clientY - oy) + 'px';
+            el.style.top  = (e.clientY - oy) + 'px';
         }
     });
 
-    const release = (e) => {
-        if(dragged === el) {
-            el.releasePointerCapture(e.pointerId);
-            if(el.dropCb) el.dropCb(e.clientX, e.clientY, el);
-            if(el.parentNode === document.body) {
-                document.getElementById('game-bot').appendChild(el);
-            }
-            el.classList.remove('dragging');
-            el.style.position = 'relative'; 
-            el.style.left = ''; el.style.top = ''; el.style.width = ''; el.style.height = '';
-            dragged = null;
+    const release = e => {
+        if (dragged !== el) return;
+        el.releasePointerCapture(e.pointerId);
+        if (el.dropCb) el.dropCb(e.clientX, e.clientY, el);
+        if (el.parentNode === document.body) {
+            document.getElementById('game-bot')?.appendChild(el);
         }
+        el.classList.remove('dragging');
+        el.style.cssText = el.style.cssText
+            .replace(/position:[^;]+;?/g,'')
+            .replace(/left:[^;]+;?/g,'')
+            .replace(/top:[^;]+;?/g,'')
+            .replace(/width:[^;]+;?/g,'')
+            .replace(/height:[^;]+;?/g,'');
+        el.style.position = 'relative';
+        dragged = null;
     };
-    el.addEventListener('pointerup', release);
+    el.addEventListener('pointerup',     release);
     el.addEventListener('pointercancel', release);
 }
 
-function hit(x, y, el) { 
-    let r = el.getBoundingClientRect(); return x>=r.left && x<=r.right && y>=r.top && y<=r.bottom;
+function hit(x, y, el) {
+    const r = el.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
 }
 
+/* ══════════════════════════════════════════════════════════
+   HELPERS DE UI
+══════════════════════════════════════════════════════════ */
 function setupUI(msg) {
-    document.getElementById('game-instr').innerHTML = msg; 
-    document.getElementById('game-top').innerHTML = '';
-    document.getElementById('game-bot').innerHTML = '';
+    document.getElementById('game-instr').innerHTML = msg;
+    document.getElementById('game-top').innerHTML   = '';
+    document.getElementById('game-bot').innerHTML   = '';
     gameState = { targets: [] };
-
-    if (window.AppUX && typeof window.AppUX.onNewInstruction === 'function') {
-        window.AppUX.onNewInstruction(msg);
-    }
+    window.AppUX?.onNewInstruction?.(msg);
 }
 
 function createTargetNode(tClass, icon) {
-    let wrap = document.createElement('div'); wrap.className = 'target-wrap';
-    if(icon) {
-        let ico = document.createElement('div'); ico.className = 'target-icon'; ico.innerText = icon;
+    const wrap = document.createElement('div');
+    wrap.className = 'target-wrap';
+    if (icon) {
+        const ico = document.createElement('div');
+        ico.className = 'target-icon';
+        ico.innerText = icon;
         wrap.appendChild(ico);
     }
-    let drop = document.createElement('div'); drop.className = `target ${tClass}`;
+    const drop = document.createElement('div');
+    drop.className = `target ${tClass}`;
     wrap.appendChild(drop);
-    return { wrap: wrap, drop: drop };
+    return { wrap, drop };
 }
 
 function createDraggables(count, emoji) {
-    let bot = document.getElementById('game-bot');
-    for(let i=0; i<count; i++) {
-        let item = document.createElement('div');
-        item.className = 'drag-item'; item.innerText = emoji;
-        dragify(item, (x,y,el) => {
+    const bot = document.getElementById('game-bot');
+    for (let i = 0; i < count; i++) {
+        const item = document.createElement('div');
+        item.className = 'drag-item';
+        item.innerText = emoji;
+        dragify(item, (x, y, el) => {
             let dropped = false;
             gameState.targets.forEach(td => {
-                if(!dropped && hit(x,y,td.drop)) {
+                if (!dropped && hit(x, y, td.drop)) {
                     dropped = true;
-                    td.drop.appendChild(el); 
+                    td.drop.appendChild(el);
                 }
             });
-            if(!dropped) document.getElementById('game-bot').appendChild(el);
+            if (!dropped) document.getElementById('game-bot')?.appendChild(el);
         });
         bot.appendChild(item);
     }
 }
 
-// LÓGICA DE JUEGOS ESPECÍFICOS
+/* ══════════════════════════════════════════════════════════
+   MINI-JUEGOS
+══════════════════════════════════════════════════════════ */
+
+/* ── Arrastrar para sumar ── */
 function initDrag(name, emoji, tClass, icon) {
-    let t = Math.floor(Math.random()*4)+4; 
-    setupUI(randomMsg([`¡Misión! Logra exactamente <b>${t}</b> ${name}.`]));
-    let targetData = createTargetNode(tClass, icon);
-    document.getElementById('game-top').appendChild(targetData.wrap); 
-    gameState.targets.push(targetData);
-    createDraggables(t+4, emoji); 
+    const t = Math.floor(Math.random() * 4) + 4;
+    setupUI(randomMsg([
+        `🎯 ¡Misión! Pon exactamente <b>${t}</b> ${name} en la zona.`,
+        `🚀 Arrastra <b>${t}</b> ${name} al destino.`
+    ]));
+    const td = createTargetNode(tClass, icon);
+    document.getElementById('game-top').appendChild(td.wrap);
+    gameState.targets.push(td);
+    createDraggables(t + 4, emoji);
+
     window.checkLogic = () => {
-    let count = gameState.targets[0].drop.querySelectorAll('.drag-item').length;
-    if(count === t) {
-        window.misionCumplida(`¡Misión cumplida! Lograste ${t}.`);
-    } else {
-        Effects.fail(`Hay ${count}, faltan/sobran.`);
-    }
-};
+        const count = td.drop.querySelectorAll('.drag-item').length;
+        if (count === t) misionCumplida(`¡Pusiste ${t} ${name}!`);
+        else             Effects.fail(`Hay ${count}. Necesitas exactamente ${t}.`);
+    };
 }
 
+/* ── Arrastrar para restar ── */
 function initDragSub(emoji, tClass, icon) {
-    let total = Math.floor(Math.random()*4)+6;
-    let toSub = Math.floor(Math.random()*3)+2;
-    let target = total - toSub;
-    setupUI(`Empiezas con <b>${total}</b>. Deja solo <b>${target}</b> abajo.`);
-    let targetData = createTargetNode(tClass, icon);
-    document.getElementById('game-top').appendChild(targetData.wrap); 
-    gameState.targets.push(targetData);
+    const total = Math.floor(Math.random() * 4) + 6;
+    const toSub = Math.floor(Math.random() * 3) + 2;
+    const tgt   = total - toSub;
+    setupUI(`Empiezas con <b>${total}</b>. Deja solo <b>${tgt}</b> abajo.`);
+    const td = createTargetNode(tClass, icon);
+    document.getElementById('game-top').appendChild(td.wrap);
+    gameState.targets.push(td);
     createDraggables(total, emoji);
+
     window.checkLogic = () => {
-    let currentLeft = document.getElementById('game-bot').querySelectorAll('.drag-item').length;
-    if(currentLeft === target) {
-        window.misionCumplida(`${total} - ${toSub} = ${target}.`); 
-    } else {
-        Effects.fail(`Quedan ${currentLeft}. Deben quedar ${target}.`);
-    }
-};
+        const left = document.getElementById('game-bot').querySelectorAll('.drag-item').length;
+        if (left === tgt) misionCumplida(`${total} − ${toSub} = ${tgt} ✓`);
+        else              Effects.fail(`Quedan ${left}. Deben quedar ${tgt}.`);
+    };
 }
 
+/* ── Destruir elementos ── */
 function initDestroy(emoji) {
-    let total = Math.floor(Math.random()*4)+6;
-    let toSub = Math.floor(Math.random()*3)+2;
-    let target = total - toSub;
-    setupUI(`Hay <b>${total}</b>. Destruye hasta que queden <b>${target}</b>.`);
-    let bot = document.getElementById('game-bot'); 
+    const total = Math.floor(Math.random() * 4) + 6;
+    const toSub = Math.floor(Math.random() * 3) + 2;
+    const tgt   = total - toSub;
+    setupUI(`Hay <b>${total}</b>. Toca los que sobran hasta que queden <b>${tgt}</b>.`);
+    const bot = document.getElementById('game-bot');
     gameState.destroyed = 0;
-    for(let i=0; i<total; i++) {
-        let item = document.createElement('div');
-        item.className='click-item'; item.innerText=emoji;
-        item.onclick = () => { 
-            if(!item.classList.contains('destroyed')){
-                item.style.transform='scale(0)'; item.classList.add('destroyed');
-                gameState.destroyed++; 
+
+    for (let i = 0; i < total; i++) {
+        const item = document.createElement('div');
+        item.className = 'click-item';
+        item.innerText = emoji;
+        item.onclick   = () => {
+            if (!item.classList.contains('destroyed')) {
+                item.style.transform = 'scale(0)';
+                item.classList.add('destroyed');
+                gameState.destroyed++;
             }
         };
         bot.appendChild(item);
     }
+
     window.checkLogic = () => {
-        let currentLeft = total - gameState.destroyed;
-        if(currentLeft === target) Effects.win(`${total} - ${toSub} = ${target}.`);
-        else Effects.fail(`Quedan ${currentLeft}. ¡Faltan destruir!`);
+        const left = total - gameState.destroyed;
+        if (left === tgt) misionCumplida(`${total} − ${toSub} = ${tgt} ✓`);
+        else              Effects.fail(`Quedan ${left}. ¡Faltan destruir más!`);
     };
 }
 
+/* ── Clonar grupos (multiplicación) ── */
 function initCloner() {
-    let grp = Math.floor(Math.random()*2)+2, tms = Math.floor(Math.random()*3)+2;
-    setupUI(`Clona <b>${tms}</b> veces el grupo de <b>${grp}</b>.`);
-    let bot = document.getElementById('game-bot');
-    let btn = document.createElement('button'); btn.className='btn-check'; btn.innerText='⚡ Clonar';
+    const grp = Math.floor(Math.random() * 2) + 2;
+    const tms = Math.floor(Math.random() * 3) + 2;
+    setupUI(`Clona <b>${tms}</b> veces el grupo de <b>${grp}</b> ⭐.`);
+    const bot = document.getElementById('game-bot');
     gameState.cloned = 0;
-    btn.onclick = () => {
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-check';
+    btn.innerText = '⚡ Clonar grupo';
+    btn.onclick   = () => {
         gameState.cloned++;
-        let g = document.createElement('div'); g.className='target t-caja'; g.innerText='⭐'.repeat(grp);
-        g.style.fontSize='3rem'; document.getElementById('game-top').appendChild(g);
+        const g = document.createElement('div');
+        g.className  = 'target t-caja clone-group';
+        g.innerText  = '⭐'.repeat(grp);
+        g.style.fontSize = '2.5rem';
+        document.getElementById('game-top').appendChild(g);
     };
     bot.appendChild(btn);
+
     window.checkLogic = () => {
-    if(gameState.cloned === tms) {
-        window.misionCumplida(`${grp} x ${tms} = ${grp*tms}.`); 
-    } else {
-        Effects.fail(`Llevas ${gameState.cloned}, faltan.`);
-    }
-};
+        if (gameState.cloned === tms) misionCumplida(`${grp} × ${tms} = ${grp * tms} ✓`);
+        else                          Effects.fail(`Llevas ${gameState.cloned} clones. Necesitas ${tms}.`);
+    };
 }
 
+/* ── Grid (multiplicación visual) ── */
 function initGrid() {
-    let rows = Math.floor(Math.random()*2)+2, cols = Math.floor(Math.random()*3)+2;
-    setupUI(`Crea un bloque de <b>${rows}</b> filas y <b>${cols}</b> columnas.`);
-    let grid = document.createElement('div'); grid.className='grid-machine'; 
-    document.getElementById('game-top').appendChild(grid);
-    gameState.r = 1; gameState.c = 1;
-    let updateGrid = () => {
-        grid.style.gridTemplateColumns = `repeat(${gameState.c}, 1fr)`; grid.innerHTML='';
-        for(let i=0; i<gameState.r*gameState.c; i++) { let cell=document.createElement('div'); cell.className='grid-cell'; grid.appendChild(cell); }
+    const rows = Math.floor(Math.random() * 2) + 2;
+    const cols = Math.floor(Math.random() * 3) + 2;
+    setupUI(`Construye una cuadrícula de <b>${rows}</b> filas × <b>${cols}</b> columnas.`);
+    const top = document.getElementById('game-top');
+    const bot = document.getElementById('game-bot');
+
+    const grid = document.createElement('div');
+    grid.className = 'grid-machine';
+    top.appendChild(grid);
+
+    gameState.r = 1;
+    gameState.c = 1;
+
+    const updateGrid = () => {
+        grid.style.gridTemplateColumns = `repeat(${gameState.c}, 1fr)`;
+        grid.innerHTML = '';
+        for (let i = 0; i < gameState.r * gameState.c; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            grid.appendChild(cell);
+        }
     };
-    let bRow = document.createElement('button'); bRow.className='btn-check'; bRow.innerText='+ Fila'; bRow.onclick=()=>{if(gameState.r<5) gameState.r++; updateGrid();};
-    let bCol = document.createElement('button'); bCol.className='btn-check'; bCol.innerText='+ Col'; bCol.onclick=()=>{if(gameState.c<5) gameState.c++; updateGrid();};
-    document.getElementById('game-bot').appendChild(bRow); document.getElementById('game-bot').appendChild(bCol);
+
+    const bRow = document.createElement('button');
+    bRow.className = 'btn-grid';
+    bRow.innerText = '+ Fila';
+    bRow.onclick   = () => { if (gameState.r < 6) { gameState.r++; updateGrid(); } };
+
+    const bCol = document.createElement('button');
+    bCol.className = 'btn-grid';
+    bCol.innerText = '+ Columna';
+    bCol.onclick   = () => { if (gameState.c < 6) { gameState.c++; updateGrid(); } };
+
+    bot.appendChild(bRow);
+    bot.appendChild(bCol);
     updateGrid();
+
     window.checkLogic = () => {
-        if(gameState.r===rows && gameState.c===cols) Effects.win(`¡Perfecto! ${rows}x${cols}`);
-        else Effects.fail(`Es ${gameState.r}x${gameState.c}.`);
+        if (gameState.r === rows && gameState.c === cols)
+            misionCumplida(`${rows} × ${cols} = ${rows * cols} ✓`);
+        else
+            Effects.fail(`Tu cuadrícula es ${gameState.r}×${gameState.c}. Debe ser ${rows}×${cols}.`);
     };
 }
 
+/* ── Arrastrar para multiplicar ── */
 function initDragMul(name, emoji, tClass, icon) {
-    let groups = Math.floor(Math.random()*2)+2, perGroup = Math.floor(Math.random()*2)+2;
-    setupUI(`Haz <b>${groups}</b> grupos de <b>${perGroup}</b>.`);
-    for(let i=0; i<groups; i++) {
-        let td = createTargetNode(tClass, icon);
+    const groups   = Math.floor(Math.random() * 2) + 2;
+    const perGroup = Math.floor(Math.random() * 2) + 2;
+    setupUI(`Haz <b>${groups}</b> grupos de <b>${perGroup}</b> ${name}.`);
+
+    for (let i = 0; i < groups; i++) {
+        const td = createTargetNode(tClass, icon);
         document.getElementById('game-top').appendChild(td.wrap);
         gameState.targets.push(td);
     }
-    createDraggables(groups*perGroup + 2, emoji);
+    createDraggables(groups * perGroup + 2, emoji);
+
     window.checkLogic = () => {
-        let ok = gameState.targets.every(td => td.drop.querySelectorAll('.drag-item').length === perGroup);
-        if(ok) Effects.win(`${groups} x ${perGroup}`);
-        else Effects.fail(`Revisa las cantidades.`);
+        const ok = gameState.targets.every(
+            td => td.drop.querySelectorAll('.drag-item').length === perGroup
+        );
+        if (ok) misionCumplida(`${groups} × ${perGroup} = ${groups * perGroup} ✓`);
+        else    Effects.fail('Revisa que cada grupo tenga la cantidad correcta.');
     };
 }
 
+/* ── Arrastrar para dividir ── */
 function initDragDiv(name, emoji, tClass, icon) {
-    let groups = Math.floor(Math.random()*2)+2, perGroup = Math.floor(Math.random()*2)+2, total = groups * perGroup;
-    setupUI(`Reparte <b>${total}</b> equitativamente en <b>${groups}</b> zonas.`);
-    for(let i=0; i<groups; i++) {
-        let td = createTargetNode(tClass, icon);
+    const groups   = Math.floor(Math.random() * 2) + 2;
+    const perGroup = Math.floor(Math.random() * 2) + 2;
+    const total    = groups * perGroup;
+    setupUI(`Reparte <b>${total}</b> ${name} de forma igual en <b>${groups}</b> zonas.`);
+
+    for (let i = 0; i < groups; i++) {
+        const td = createTargetNode(tClass, icon);
         document.getElementById('game-top').appendChild(td.wrap);
         gameState.targets.push(td);
     }
     createDraggables(total, emoji);
+
     window.checkLogic = () => {
-        let count = gameState.targets[0].drop.querySelectorAll('.drag-item').length;
-        let ok = gameState.targets.every(td => td.drop.querySelectorAll('.drag-item').length === count);
-        let sum = 0; gameState.targets.forEach(td => sum += td.drop.querySelectorAll('.drag-item').length);
-        if(ok && sum === total) Effects.win(`${total} ÷ ${groups} = ${count}.`);
-        else Effects.fail(`No están iguales o faltan piezas.`);
+        const counts = gameState.targets.map(
+            td => td.drop.querySelectorAll('.drag-item').length
+        );
+        const sum   = counts.reduce((a, b) => a + b, 0);
+        const allEq = counts.every(c => c === counts[0]);
+        if (allEq && sum === total)
+            misionCumplida(`${total} ÷ ${groups} = ${perGroup} ✓`);
+        else
+            Effects.fail('No están repartidos por igual o faltan piezas.');
     };
 }
 
 
 function misionCumplida(mensaje) {
-    // 1. Mostrar efectos visuales (confeti y mensaje)
-    if (window.Effects && window.Effects.win) {
-        window.Effects.win(mensaje);
-    }
-    const resultScore = document.getElementById('result-score');
-    if (resultScore) resultScore.innerText = window.points;
-   try {
-        guardarEstrellas(puntosGanados); // puntosGanados vale 1
-        console.log("Sincronizando 1 estrella...");
-    } catch (error) {
-        console.error("Error al guardar:", error);
-    }
+    // Effects.win registra la respuesta en GS y decide si mostrar resultado
+    if (window.Effects?.win) window.Effects.win(mensaje);
+
+    // Guardar en Firebase de forma asíncrona (no bloquea la UI)
+    try { guardarEstrellas(1); } catch (e) { console.warn('Firebase:', e); }
 }
 
-// Asegurarla en el objeto global window
+/* ── Exportar al scope global ── */
+window.initDrag     = initDrag;
+window.initDragSub  = initDragSub;
+window.initDragMul  = initDragMul;
+window.initDragDiv  = initDragDiv;
+window.initDestroy  = initDestroy;
+window.initCloner   = initCloner;
+window.initGrid     = initGrid;
 window.misionCumplida = misionCumplida;
-
-// Al final de js/game-logic.js
-window.initDrag = initDrag;
-window.initDragSub = initDragSub;
-window.initDragMul = initDragMul;
-window.initDragDiv = initDragDiv;
-window.initDestroy = initDestroy;
-window.initCloner = initCloner;
-window.initGrid = initGrid;
-window.misionCumplida = misionCumplida;
-
+window.checkLogic   = null;   // se sobreescribe al init de cada juego

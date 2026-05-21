@@ -1,5 +1,3 @@
-// accessibility.js
-// Voz (SpeechSynthesis) + barra de progreso del bloque (5 retos)
 
 (function () {
     const STORAGE_KEY_AUDIO = 'mathadhd_audio_enabled';

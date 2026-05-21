@@ -1,65 +1,77 @@
+
 const Effects = {
-    audioCtx: null,
-    muted: false,
-    
-    getAudioContext() {
+    audioCtx : null,
+    muted    : false,
+
+    /* ── Audio ───────────────────────────────────── */
+    _ctx() {
         if (!this.audioCtx) {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (AudioContext) this.audioCtx = new AudioContext();
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (AC) this.audioCtx = new AC();
         }
-        if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume();
+        if (this.audioCtx?.state === 'suspended') this.audioCtx.resume();
         return this.audioCtx;
     },
 
-    playTone(frequency = 440, duration = 0.12, type = 'sine', volume = 0.08) {
+    playTone(freq = 440, dur = 0.12, type = 'sine', vol = 0.08) {
         if (this.muted) return;
-        const ctx = this.getAudioContext();
+        const ctx = this._ctx();
         if (!ctx) return;
-        const osc = ctx.createOscillator();
+        const osc  = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = type;
-        osc.frequency.setValueAtTime(frequency, ctx.currentTime);
-        gain.gain.setValueAtTime(volume, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(vol, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
-        osc.stop(ctx.currentTime + duration);
+        osc.stop(ctx.currentTime + dur);
     },
 
-    soundClick() {
-        this.playTone(520, 0.07, 'triangle', 0.045);
-    },
-
-    soundError() {
+    soundClick()   { this.playTone(520,  0.07, 'triangle', 0.045); },
+    soundError()   {
         this.playTone(220, 0.12, 'sine', 0.055);
         setTimeout(() => this.playTone(170, 0.16, 'sine', 0.045), 110);
     },
-
     soundSuccess() {
         this.playTone(523.25, 0.13, 'triangle', 0.065);
         setTimeout(() => this.playTone(659.25, 0.13, 'triangle', 0.065), 120);
         setTimeout(() => this.playTone(783.99, 0.20, 'triangle', 0.075), 240);
     },
+    soundComplete() {
+        // Fanfarria especial al completar un bloque de 5
+        [523, 659, 784, 1047].forEach((f, i) => {
+            setTimeout(() => this.playTone(f, 0.22, 'triangle', 0.08), i * 130);
+        });
+    },
 
-    celebrateConfetti() {
+    /* ── Confetti ────────────────────────────────── */
+    celebrateConfetti(intense = false) {
         const layer = document.getElementById('confetti-layer');
         if (!layer) return;
         layer.innerHTML = '';
-        const colors = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#FACC15'];
-        for (let i = 0; i < 95; i++) {
-            const piece = document.createElement('span');
-            piece.className = 'confetti-piece';
-            piece.style.left = Math.random() * 100 + 'vw';
-            piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-            piece.style.animationDuration = (1.8 + Math.random() * 1.7) + 's';
-            piece.style.animationDelay = (Math.random() * 0.35) + 's';
-            piece.style.transform = `rotate(${Math.random() * 360}deg)`;
-            layer.appendChild(piece);
+        // Usar colores del tema activo si están disponibles
+        const colors = this._themeColors || ['#2563EB','#10B981','#F59E0B','#EF4444','#8B5CF6','#FACC15','#EC4899'];
+        const count  = intense ? 160 : 80;
+        for (let i = 0; i < count; i++) {
+            const p = document.createElement('span');
+            p.className = 'confetti-piece';
+            p.style.cssText = `
+                left:${Math.random()*100}vw;
+                background:${colors[Math.floor(Math.random()*colors.length)]};
+                animation-duration:${(1.6 + Math.random()*1.8).toFixed(2)}s;
+                animation-delay:${(Math.random()*0.4).toFixed(2)}s;
+                transform:rotate(${Math.floor(Math.random()*360)}deg);
+                width:${8 + Math.floor(Math.random()*10)}px;
+                height:${10 + Math.floor(Math.random()*14)}px;
+            `;
+            layer.appendChild(p);
         }
-        setTimeout(() => { layer.innerHTML = ''; }, 3900);
+        setTimeout(() => { layer.innerHTML = ''; }, intense ? 5000 : 3500);
     },
 
+    /* ── Score bump ──────────────────────────────── */
     animateScore() {
         const score = document.getElementById('score');
         if (!score) return;
@@ -68,13 +80,15 @@ const Effects = {
         score.classList.add('score-bump');
     },
 
-    showResultScreen(msg) {
+    /* ── Pantalla de resultado ───────────────────── */
+    _showResultScreen(msg) {
         const resultMessage = document.getElementById('result-message');
-        const resultScore = document.getElementById('result-score');
-        const stars = document.querySelectorAll('#result-stars span');
+        const resultScore   = document.getElementById('result-score');
+        const stars         = document.querySelectorAll('#result-stars span');
 
-        if (resultMessage) resultMessage.innerText = `¡Muy bien! ${msg} Ganaste una estrella por completar el reto.`;
-        if (resultScore) resultScore.innerText = window.points || 0;
+        if (resultMessage) resultMessage.innerText =
+            `¡Increíble! ${msg} Completaste las 5 misiones del bloque.`;
+        if (resultScore) resultScore.innerText = window.GS.totalPoints;
 
         stars.forEach(star => {
             star.style.animation = 'none';
@@ -82,87 +96,128 @@ const Effects = {
             star.style.animation = '';
         });
 
-        if (window.Navigation && typeof Navigation.goTo === 'function') {
-            Navigation.goTo('screen-result');
-        } else {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-result')?.classList.add('active');
-        }
+        window.Navigation?.showResult();
     },
-    
+
+    /* ── VICTORIA ────────────────────────────────── */
     win(msg) {
-       
-        window.points++;
+        // Registrar respuesta correcta en el estado global
+        window.GS.registerCorrectAnswer();
 
-        const scoreElement = document.getElementById('score');
-        if (scoreElement) scoreElement.innerText = window.points;
+        // Actualizar puntaje en top-bar
+        const scoreEl = document.getElementById('score');
+        if (scoreEl) scoreEl.innerText = window.GS.totalPoints;
 
-        if (window.AppUX && typeof window.AppUX.onExerciseWin === 'function') {
-            window.AppUX.onExerciseWin();
-        }
-        
+        // Notificar a accesibilidad para barra de progreso
+        if (window.AppUX?.onExerciseWin) window.AppUX.onExerciseWin();
+
+        // Feedback positivo
         const fb = document.getElementById('game-feedback');
-        fb.innerText = '¡Excelente! ' + msg;
-        fb.style.color = 'var(--success)';
-        fb.className = 'feedback feedback-success-pop';
+        if (fb) {
+            fb.innerText   = '¡Excelente! 🌟 ' + msg;
+            fb.style.color = 'var(--success)';
+            fb.className   = 'feedback feedback-success-pop';
+        }
 
-        document.getElementById('btn-check').style.display = 'none';
-        document.getElementById('btn-reset').style.display = 'none';
-        document.getElementById('btn-next').style.display = 'block';
-
-        this.soundSuccess();
         this.animateScore();
-        this.celebrateConfetti();
 
-        setTimeout(() => this.showResultScreen(msg), 650);
+        if (window.GS.isBlockComplete()) {
+            /* ── Bloque terminado (5/5) ── */
+            this.soundComplete();
+            this.celebrateConfetti(true);
+
+            // Ocultar todos los botones de acción
+            this._setActionButtons('done');
+
+            // Mostrar pantalla de resultado tras breve pausa
+            setTimeout(() => this._showResultScreen(msg), 900);
+
+        } else {
+            /* ── Pregunta correcta, pero bloque incompleto ── */
+            this.soundSuccess();
+            this.celebrateConfetti(false);
+
+            // Mostrar solo "Siguiente reto"
+            this._setActionButtons('next');
+        }
     },
 
+    /* ── FALLO ───────────────────────────────────── */
     fail(msg) {
         const fb = document.getElementById('game-feedback');
-        fb.innerHTML = '¡Ups! ' + msg + ' <br>¡Inténtalo otra vez!';
-        fb.className = 'feedback shake-anim';
-        fb.style.color = 'var(--danger)';
+        if (fb) {
+            fb.innerHTML   = '¡Ups! ' + msg + '<br><small>¡Inténtalo de nuevo!</small>';
+            fb.className   = 'feedback shake-anim';
+            fb.style.color = 'var(--danger)';
+        }
         this.soundError();
-        setTimeout(() => fb.classList.remove('shake-anim'), 500);
+        setTimeout(() => { if (fb) fb.classList.remove('shake-anim'); }, 500);
     },
 
+    /* ── Limpiar para nueva pregunta ─────────────── */
     clear() {
-        document.getElementById('game-feedback').innerText = '';
-        document.getElementById('game-feedback').className = 'feedback';
-        document.getElementById('btn-check').style.display = 'block';
-        document.getElementById('btn-reset').style.display = 'block';
-        document.getElementById('btn-next').style.display = 'none';
+        const fb = document.getElementById('game-feedback');
+        if (fb) { fb.innerText = ''; fb.className = 'feedback'; }
+        this._setActionButtons('normal');
     },
 
+    /* ── Devolver piezas al área inferior ────────── */
     resetLevel() {
-        // Lógica de devolver elementos al bot
         const bot = document.getElementById('game-bot');
         document.querySelectorAll('.target .drag-item').forEach(el => {
             el.style.position = 'relative';
-            bot.appendChild(el);
+            bot?.appendChild(el);
         });
         document.querySelectorAll('.click-item').forEach(el => {
             el.style.transform = 'scale(1)';
             el.classList.remove('destroyed');
         });
-        if (gameState) gameState.destroyed = 0;
-        if (gameState && (gameState.cloned !== undefined || gameState.r !== undefined)) {
-            currentInitFunc();
+        // Reiniciar estado del mini-juego
+        if (window.GS?.currentInitFunc) {
+            this.clear();
+            window.GS.currentInitFunc();
+        } else {
+            this.clear();
         }
         this.soundClick();
-        this.clear();
     },
 
+    /* ── Helper: visibilidad de botones ──────────── */
+    _setActionButtons(mode) {
+        const check = document.getElementById('btn-check');
+        const reset = document.getElementById('btn-reset');
+        const next  = document.getElementById('btn-next');
+        if (!check || !reset || !next) return;
+
+        switch (mode) {
+            case 'normal':
+                check.style.display = 'block';
+                reset.style.display = 'block';
+                next.style.display  = 'none';
+                break;
+            case 'next':
+                check.style.display = 'none';
+                reset.style.display = 'none';
+                next.style.display  = 'block';
+                next.textContent    = `¡Siguiente misión! (${window.GS.questionsInBlock}/${window.GS.BLOCK_SIZE})`;
+                break;
+            case 'done':
+                check.style.display = 'none';
+                reset.style.display = 'none';
+                next.style.display  = 'none';
+                break;
+        }
+    },
+
+    /* ── Sonido global en clics ──────────────────── */
     attachGlobalClickSound() {
-        document.addEventListener('click', (event) => {
-            const btn = event.target.closest('button');
+        document.addEventListener('click', e => {
+            const btn = e.target.closest('button');
             if (!btn) return;
-            if (btn.closest('[data-no-sound="1"]')) return;
-            if (btn.getAttribute('data-no-sound') === '1') return;
+            if (btn.dataset.noSound === '1') return;
             this.soundClick();
         }, true);
     }
 };
 
-// Expose for other modules (e.g., accessibility.js mute toggle)
 window.Effects = Effects;

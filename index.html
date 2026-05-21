@@ -3,32 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Academia Espacial Matemática</title>
+    <title>Academia Matemática</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/theme-system.css">
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════
-     SPLASH SCREEN — se muestra mientras carga Firebase
-═══════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════
+     SPLASH SCREEN
+═══════════════════════════════════════════════════════ -->
 <div id="splash-screen" class="splash-overlay">
-    <!-- Estrellas de fondo animadas -->
     <div class="stars-layer" aria-hidden="true">
         <div class="stars stars-sm"></div>
         <div class="stars stars-md"></div>
         <div class="stars stars-lg"></div>
     </div>
-
     <div class="splash-content">
-        <!-- Cohete CSS -->
         <div class="rocket-wrapper">
             <div class="rocket-container">
-                <div class="rocket-body">
-                    <div class="rocket-window"></div>
-                </div>
+                <div class="rocket-body"><div class="rocket-window"></div></div>
                 <div class="rocket-fin fin-left"></div>
                 <div class="rocket-fin fin-right"></div>
                 <div class="rocket-fire"></div>
@@ -38,113 +34,112 @@
                 <span></span><span></span><span></span><span></span>
             </div>
         </div>
-
         <h2 class="loading-text">Preparando misión matemática...</h2>
-
         <div class="loading-bar-container">
             <div class="loading-bar"></div>
         </div>
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════
-     APP PRINCIPAL
-═══════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════
+     APP
+═══════════════════════════════════════════════════════ -->
 <div class="app">
 
-    <!-- TOP BAR -->
     <header class="top-bar">
         <button class="btn-back" id="btn-back" style="display:none;" aria-label="Volver">
-            <span aria-hidden="true">◀</span> Volver
+            ◀ Volver
         </button>
         <span class="top-title">🚀 MathSpace</span>
         <div class="top-actions">
+            <!-- Botón de cambio de tema -->
+            <button class="btn-icon" id="btn-theme" data-no-sound="1"
+                    aria-label="Cambiar tema" title="Cambiar temática visual">🎨</button>
             <button class="btn-icon" id="btn-settings" data-no-sound="1"
-                    aria-label="Configuración de voz" title="Configuración de voz">⚙</button>
-            <span class="top-score" aria-label="Estrellas acumuladas">
-                ⭐ <span id="score">0</span>
-            </span>
+                    aria-label="Configuración" title="Configuración de voz">⚙</button>
+            <span class="top-score" aria-label="Estrellas">⭐ <span id="score">0</span></span>
         </div>
     </header>
 
-    <!-- ── PANTALLA PRINCIPAL ── -->
+    <!-- ── MENÚ PRINCIPAL ── -->
     <main id="screen-main" class="screen active">
-        <h1>Academia Espacial Matemática</h1>
+        <h1>Academia Espacial<br>Matemática</h1>
         <div class="grid-2x2">
             <button class="btn-menu c-add" data-op="add">
                 <span class="btn-emoji" aria-hidden="true">🌟</span>
-                Sumar
+                <span class="btn-label">Sumar</span>
             </button>
             <button class="btn-menu c-sub" data-op="sub">
                 <span class="btn-emoji" aria-hidden="true">☄️</span>
-                Restar
+                <span class="btn-label">Restar</span>
             </button>
             <button class="btn-menu c-mul" data-op="mul">
                 <span class="btn-emoji" aria-hidden="true">🌀</span>
-                Multiplicar
+                <span class="btn-label">Multiplicar</span>
             </button>
             <button class="btn-menu c-div" data-op="div">
                 <span class="btn-emoji" aria-hidden="true">🔭</span>
-                Dividir
+                <span class="btn-label">Dividir</span>
             </button>
         </div>
     </main>
 
-    <!-- ── PANTALLA SUBMENU ── -->
+    <!-- ── SUBMENÚ ── -->
     <section id="screen-sub" class="screen">
-        <h2 id="sub-title">Elige tu Reto</h2>
+        <h2 id="sub-title">Elige tu Misión</h2>
         <div class="grid-2x2" id="sub-list"></div>
     </section>
 
-    <!-- ── PANTALLA DE JUEGO ── -->
+    <!-- ── JUEGO ── -->
     <section id="screen-game" class="screen">
         <div class="block-progress" aria-label="Progreso del bloque">
             <div class="block-progress-track"
                  id="block-progress-track"
                  role="progressbar"
-                 aria-valuemin="0"
-                 aria-valuemax="5"
-                 aria-valuenow="0">
+                 aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
                 <div class="block-progress-fill" id="block-progress-fill"></div>
             </div>
             <div class="block-progress-text" id="block-progress-text">0/5</div>
         </div>
 
         <div class="instruction" id="game-instr"></div>
-        <div id="game-top"  class="game-area area-top"></div>
-        <div id="game-bot"  class="game-area area-bot"></div>
+        <div id="game-top" class="game-area area-top"></div>
+        <div id="game-bot" class="game-area area-bot"></div>
         <div id="game-feedback" class="feedback" aria-live="polite"></div>
 
-        <div class="actions-container" id="actions-container">
-            <button class="btn-reset" id="btn-reset">↻ Devolver Todo</button>
-            <button class="btn-check" id="btn-check">¡Comprobar!</button>
-            <button class="btn-next"  id="btn-next">¡Siguiente Reto! →</button>
+        <div class="actions-container">
+            <button class="btn-reset" id="btn-reset">↻ Devolver</button>
+            <button class="btn-check" id="btn-check">¡Comprobar! ✓</button>
+            <button class="btn-next"  id="btn-next" style="display:none;">Siguiente misión →</button>
         </div>
     </section>
 
-    <!-- ── PANTALLA RESULTADO ── -->
+    <!-- ── RESULTADO ── -->
     <section id="screen-result" class="screen result-screen" aria-live="polite">
         <div class="result-card">
             <div class="result-badge">🚀</div>
-            <h2 id="result-title">¡Misión completada!</h2>
-            <p id="result-message">Ganaste una estrella por tu valor espacial.</p>
-            <div class="result-stars" id="result-stars" aria-label="Estrellas ganadas">
+            <h2 id="result-title">¡Bloque completado!</h2>
+            <p id="result-message">Completaste las 5 misiones.</p>
+            <div class="result-stars" id="result-stars" aria-label="Estrellas">
                 <span>⭐</span><span>⭐</span><span>⭐</span>
             </div>
             <div class="result-total">
-                Total acumulado: <strong>⭐ <span id="result-score">0</span></strong>
+                Total: <strong>⭐ <span id="result-score">0</span></strong>
             </div>
             <div class="result-actions">
-                <button class="btn-result btn-result-next" id="btn-result-next">Siguiente reto</button>
-                <button class="btn-result btn-result-menu" id="btn-result-menu">Volver a juegos</button>
+                <button class="btn-result btn-result-next" id="btn-result-next">
+                    Elegir otra misión
+                </button>
+                <button class="btn-result btn-result-menu" id="btn-result-menu">
+                    Menú principal
+                </button>
             </div>
         </div>
     </section>
 
-    <!-- Capa de confetti -->
     <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
 
-    <!-- Modal de configuración -->
+    <!-- ── MODAL CONFIGURACIÓN ── -->
     <div id="settings-modal" class="settings-modal" aria-hidden="true">
         <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
             <div class="settings-title" id="settings-title">⚙ Configuración</div>
@@ -163,14 +158,49 @@
         </div>
     </div>
 
-</div><!-- /.app -->
+    <!-- ── MODAL SELECTOR DE TEMA ── -->
+    <div id="theme-modal" class="theme-modal" aria-hidden="true">
+        <div class="theme-dialog" role="dialog" aria-modal="true" aria-labelledby="theme-modal-title">
+            <div class="theme-dialog-title" id="theme-modal-title">🎨 Elige tu temática</div>
+            <p class="theme-dialog-subtitle">¡Cambia el aspecto del juego cuando quieras!</p>
+            <div class="theme-cards">
+                <button class="theme-card" data-theme="space" type="button" aria-label="Temática Espacial">
+                    <span class="theme-card-emoji">🚀</span>
+                    <span class="theme-card-name">Espacial</span>
+                </button>
+                <button class="theme-card" data-theme="explorer" type="button" aria-label="Temática Exploradores">
+                    <span class="theme-card-emoji">🧭</span>
+                    <span class="theme-card-name">Exploradores</span>
+                </button>
+                <button class="theme-card" data-theme="hero" type="button" aria-label="Temática Superhéroes">
+                    <span class="theme-card-emoji">🦸</span>
+                    <span class="theme-card-name">Superhéroes</span>
+                </button>
+            </div>
+            <button class="theme-close" id="theme-modal-close" data-no-sound="1" type="button">
+                ✓ Listo
+            </button>
+        </div>
+    </div>
 
-<!-- Scripts — orden importante -->
+</div>
+
+<!--
+    ORDEN DE CARGA — crítico:
+    1. game-state.js  → crea window.GS (sin dependencias)
+    2. theme-system.js→ define THEMES + ThemeManager
+    3. navigation.js  → lee window.GS y window.DB
+    4. effects-qa.js  → lee window.GS y window.Navigation
+    5. accessibility  → escucha eventos DOM
+    6. Módulos ES     → game-logic y main (pueden importar entre sí)
+-->
+<script src="js/game-state.js"></script>
+<script src="js/theme-system.js"></script>
 <script src="js/navigation.js"></script>
-<script type="module" src="js/game-logic.js"></script>
 <script src="js/effects-qa.js"></script>
 <script src="js/accessibility.js"></script>
 <script type="module" src="js/auth-manager.js"></script>
+<script type="module" src="js/game-logic.js"></script>
 <script type="module" src="js/main.js"></script>
 
 </body>
