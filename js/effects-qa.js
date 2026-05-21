@@ -1,9 +1,11 @@
+/**
+ * effects-qa.js  — v2: hooks de gamificación integrados
+ */
 
 const Effects = {
     audioCtx : null,
     muted    : false,
 
-    /* ── Audio ───────────────────────────────────── */
     _ctx() {
         if (!this.audioCtx) {
             const AC = window.AudioContext || window.webkitAudioContext;
@@ -29,7 +31,7 @@ const Effects = {
         osc.stop(ctx.currentTime + dur);
     },
 
-    soundClick()   { this.playTone(520,  0.07, 'triangle', 0.045); },
+    soundClick()   { this.playTone(520, 0.07, 'triangle', 0.045); },
     soundError()   {
         this.playTone(220, 0.12, 'sine', 0.055);
         setTimeout(() => this.playTone(170, 0.16, 'sine', 0.045), 110);
@@ -40,18 +42,15 @@ const Effects = {
         setTimeout(() => this.playTone(783.99, 0.20, 'triangle', 0.075), 240);
     },
     soundComplete() {
-        // Fanfarria especial al completar un bloque de 5
         [523, 659, 784, 1047].forEach((f, i) => {
             setTimeout(() => this.playTone(f, 0.22, 'triangle', 0.08), i * 130);
         });
     },
 
-    /* ── Confetti ────────────────────────────────── */
     celebrateConfetti(intense = false) {
         const layer = document.getElementById('confetti-layer');
         if (!layer) return;
         layer.innerHTML = '';
-        // Usar colores del tema activo si están disponibles
         const colors = this._themeColors || ['#2563EB','#10B981','#F59E0B','#EF4444','#8B5CF6','#FACC15','#EC4899'];
         const count  = intense ? 160 : 80;
         for (let i = 0; i < count; i++) {
@@ -71,7 +70,6 @@ const Effects = {
         setTimeout(() => { layer.innerHTML = ''; }, intense ? 5000 : 3500);
     },
 
-    /* ── Score bump ──────────────────────────────── */
     animateScore() {
         const score = document.getElementById('score');
         if (!score) return;
@@ -80,7 +78,6 @@ const Effects = {
         score.classList.add('score-bump');
     },
 
-    /* ── Pantalla de resultado ───────────────────── */
     _showResultScreen(msg) {
         const resultMessage = document.getElementById('result-message');
         const resultScore   = document.getElementById('result-score');
@@ -99,19 +96,18 @@ const Effects = {
         window.Navigation?.showResult();
     },
 
-    /* ── VICTORIA ────────────────────────────────── */
     win(msg) {
-        // Registrar respuesta correcta en el estado global
         window.GS.registerCorrectAnswer();
 
-        // Actualizar puntaje en top-bar
+        /* Actualizar score */
         const scoreEl = document.getElementById('score');
         if (scoreEl) scoreEl.innerText = window.GS.totalPoints;
 
-        // Notificar a accesibilidad para barra de progreso
+        /* Animación ganancia estrella */
+        window.GM?.showStarGain?.(1);
+
         if (window.AppUX?.onExerciseWin) window.AppUX.onExerciseWin();
 
-        // Feedback positivo
         const fb = document.getElementById('game-feedback');
         if (fb) {
             fb.innerText   = '¡Excelente! 🌟 ' + msg;
@@ -122,28 +118,22 @@ const Effects = {
         this.animateScore();
 
         if (window.GS.isBlockComplete()) {
-            /* ── Bloque terminado (5/5) ── */
             this.soundComplete();
             this.celebrateConfetti(true);
-
-            // Ocultar todos los botones de acción
             this._setActionButtons('done');
-
-            // Mostrar pantalla de resultado tras breve pausa
             setTimeout(() => this._showResultScreen(msg), 900);
-
         } else {
-            /* ── Pregunta correcta, pero bloque incompleto ── */
             this.soundSuccess();
             this.celebrateConfetti(false);
-
-            // Mostrar solo "Siguiente reto"
             this._setActionButtons('next');
         }
     },
 
-    /* ── FALLO ───────────────────────────────────── */
     fail(msg) {
+        /* Registrar fallo para romper racha */
+        window.GS.registerWrongAnswer?.();
+        window.GM?.checkMissions?.();
+
         const fb = document.getElementById('game-feedback');
         if (fb) {
             fb.innerHTML   = '¡Ups! ' + msg + '<br><small>¡Inténtalo de nuevo!</small>';
@@ -154,14 +144,12 @@ const Effects = {
         setTimeout(() => { if (fb) fb.classList.remove('shake-anim'); }, 500);
     },
 
-    /* ── Limpiar para nueva pregunta ─────────────── */
     clear() {
         const fb = document.getElementById('game-feedback');
         if (fb) { fb.innerText = ''; fb.className = 'feedback'; }
         this._setActionButtons('normal');
     },
 
-    /* ── Devolver piezas al área inferior ────────── */
     resetLevel() {
         const bot = document.getElementById('game-bot');
         document.querySelectorAll('.target .drag-item').forEach(el => {
@@ -172,7 +160,6 @@ const Effects = {
             el.style.transform = 'scale(1)';
             el.classList.remove('destroyed');
         });
-        // Reiniciar estado del mini-juego
         if (window.GS?.currentInitFunc) {
             this.clear();
             window.GS.currentInitFunc();
@@ -182,7 +169,6 @@ const Effects = {
         this.soundClick();
     },
 
-    /* ── Helper: visibilidad de botones ──────────── */
     _setActionButtons(mode) {
         const check = document.getElementById('btn-check');
         const reset = document.getElementById('btn-reset');
@@ -209,7 +195,6 @@ const Effects = {
         }
     },
 
-    /* ── Sonido global en clics ──────────────────── */
     attachGlobalClickSound() {
         document.addEventListener('click', e => {
             const btn = e.target.closest('button');

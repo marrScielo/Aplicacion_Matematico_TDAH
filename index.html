@@ -9,12 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/theme-system.css">
+    <link rel="stylesheet" href="css/gamification.css">
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════
      SPLASH SCREEN
-═══════════════════════════════════════════════════════ -->
+═══════════════════════════════════════════════════ -->
 <div id="splash-screen" class="splash-overlay">
     <div class="stars-layer" aria-hidden="true">
         <div class="stars stars-sm"></div>
@@ -41,9 +42,9 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════
      APP
-═══════════════════════════════════════════════════════ -->
+═══════════════════════════════════════════════════ -->
 <div class="app">
 
     <header class="top-bar">
@@ -52,14 +53,31 @@
         </button>
         <span class="top-title">🚀 MathSpace</span>
         <div class="top-actions">
-            <!-- Botón de cambio de tema -->
+            <!-- Avatar en HUD -->
+            <button class="hud-avatar-btn avatar-display" id="hud-avatar-btn"
+                    title="Mi perfil" aria-label="Ver perfil">⭐</button>
+            <!-- Racha -->
+            <span class="hud-streak" id="hud-streak" style="display:none"></span>
+            <!-- Misiones -->
+            <button class="hud-missions-btn" id="hud-missions-btn"
+                    data-no-sound="1" aria-label="Misiones">
+                🎯
+                <span class="hud-missions-badge" id="hud-missions-count">0</span>
+            </button>
+            <!-- Tema -->
             <button class="btn-icon" id="btn-theme" data-no-sound="1"
                     aria-label="Cambiar tema" title="Cambiar temática visual">🎨</button>
+            <!-- Config -->
             <button class="btn-icon" id="btn-settings" data-no-sound="1"
                     aria-label="Configuración" title="Configuración de voz">⚙</button>
+            <!-- Score -->
             <span class="top-score" aria-label="Estrellas">⭐ <span id="score">0</span></span>
         </div>
     </header>
+
+    <!-- ═══════════════════════════════════════════════
+         PANTALLAS PRINCIPALES
+    ═══════════════════════════════════════════════ -->
 
     <!-- ── MENÚ PRINCIPAL ── -->
     <main id="screen-main" class="screen active">
@@ -137,6 +155,87 @@
         </div>
     </section>
 
+    <!-- ══════════════════════════════════════════════════
+         PANTALLAS DE GAMIFICACIÓN
+    ══════════════════════════════════════════════════ -->
+
+    <!-- ── PERFIL ── -->
+    <section id="screen-profile" class="screen">
+        <div class="profile-hero">
+            <div class="profile-avatar-big avatar-display" id="profile-avatar-big">⭐</div>
+            <div class="profile-avatar-name avatar-name" id="profile-avatar-name">Mi Héroe</div>
+        </div>
+
+        <div class="profile-stats-grid">
+            <div class="profile-stat">
+                <div class="profile-stat-val" id="profile-stars">0</div>
+                <div class="profile-stat-lbl">⭐ Estrellas</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-val" id="profile-blocks">0</div>
+                <div class="profile-stat-lbl">🏆 Bloques</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-val" id="profile-correct">0</div>
+                <div class="profile-stat-lbl">✅ Correctas</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-val" id="profile-streak">0</div>
+                <div class="profile-stat-lbl">🔥 Racha Max</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-val" id="profile-coins">0</div>
+                <div class="profile-stat-lbl">💰 Monedas</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-val" id="profile-inventory">0</div>
+                <div class="profile-stat-lbl">🎒 Accesorios</div>
+            </div>
+        </div>
+
+        <div class="profile-section-title">🎯 Progreso de Misiones</div>
+        <div class="profile-mission-bar-wrap">
+            <div class="profile-mission-bar" id="profile-mission-bar" style="width:0%"></div>
+        </div>
+        <div class="profile-mission-txt" id="profile-mission-txt">0 / 8 misiones</div>
+
+        <div class="profile-section-title">✨ Accesorios Equipados</div>
+        <div class="equipped-chips" id="profile-equipped">
+            <span class="profile-empty">¡Ve a la tienda a conseguir accesorios!</span>
+        </div>
+    </section>
+
+    <!-- ── MISIONES ── -->
+    <section id="screen-missions" class="screen">
+        <div class="missions-header">
+            <h2>🎯 Mis Misiones</h2>
+            <p>¡Completa misiones para ganar estrellas!</p>
+        </div>
+        <div id="missions-list"></div>
+    </section>
+
+    <!-- ── TIENDA ── -->
+    <section id="screen-shop" class="screen">
+        <div class="shop-header">
+            <div class="shop-title">🛍️ Tienda</div>
+            <div class="shop-wallet">
+                💰 <span class="shop-coins" id="shop-coins">0</span>
+            </div>
+        </div>
+
+        <div class="shop-filters">
+            <button class="shop-filter-btn active" data-filter="">🌈 Todo</button>
+            <button class="shop-filter-btn" data-filter="space">🚀 Espacial</button>
+            <button class="shop-filter-btn" data-filter="explorer">🧭 Explorador</button>
+            <button class="shop-filter-btn" data-filter="hero">🦸 Superhéroe</button>
+        </div>
+
+        <div id="shop-items"></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         CAPAS GLOBALES
+    ═══════════════════════════════════════════════ -->
     <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
 
     <!-- ── MODAL CONFIGURACIÓN ── -->
@@ -183,19 +282,66 @@
         </div>
     </div>
 
-</div>
+    <!-- ── MODAL SELECTOR DE AVATAR (primera vez) ── -->
+    <div id="avatar-selector-modal" aria-hidden="true">
+        <div class="avatar-selector-card" role="dialog" aria-modal="true">
+            <div class="avatar-selector-title">¡Elige tu héroe! 🎉</div>
+            <div class="avatar-selector-sub">Este será tu personaje en la aventura. ¡Solo puedes elegir uno!</div>
+            <div class="avatar-choices">
+                <button class="avatar-choice-btn" data-avatar="space" type="button">
+                    <span class="avatar-choice-emoji">👨‍🚀</span>
+                    <span class="avatar-choice-name">Astronauta</span>
+                    <span class="avatar-choice-desc">Explora el universo</span>
+                </button>
+                <button class="avatar-choice-btn" data-avatar="explorer" type="button">
+                    <span class="avatar-choice-emoji">🧭</span>
+                    <span class="avatar-choice-name">Explorador</span>
+                    <span class="avatar-choice-desc">Descubre mundos</span>
+                </button>
+                <button class="avatar-choice-btn" data-avatar="hero" type="button">
+                    <span class="avatar-choice-emoji">🦸</span>
+                    <span class="avatar-choice-name">Superhéroe</span>
+                    <span class="avatar-choice-desc">¡Salva el día!</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── NAVEGACIÓN INFERIOR ── -->
+    <nav class="bottom-nav" role="navigation" aria-label="Navegación principal">
+        <button class="bottom-nav-btn active" data-screen="screen-main" aria-label="Jugar">
+            <span class="nav-icon">🎮</span>
+            <span>Jugar</span>
+        </button>
+        <button class="bottom-nav-btn" data-screen="screen-missions" aria-label="Misiones">
+            <span class="nav-icon">🎯</span>
+            <span>Misiones</span>
+        </button>
+        <button class="bottom-nav-btn" data-screen="screen-shop" aria-label="Tienda">
+            <span class="nav-icon">🛍️</span>
+            <span>Tienda</span>
+        </button>
+        <button class="bottom-nav-btn" data-screen="screen-profile" aria-label="Perfil">
+            <span class="nav-icon avatar-display">⭐</span>
+            <span>Perfil</span>
+        </button>
+    </nav>
+
+</div><!-- /.app -->
 
 <!--
     ORDEN DE CARGA — crítico:
-    1. game-state.js  → crea window.GS (sin dependencias)
-    2. theme-system.js→ define THEMES + ThemeManager
-    3. navigation.js  → lee window.GS y window.DB
-    4. effects-qa.js  → lee window.GS y window.Navigation
-    5. accessibility  → escucha eventos DOM
-    6. Módulos ES     → game-logic y main (pueden importar entre sí)
+    1. game-state.js   → window.GS (sin dependencias)
+    2. theme-system.js → THEMES + ThemeManager
+    3. gamification.js → window.GM
+    4. navigation.js   → usa window.GS y window.GM
+    5. effects-qa.js   → usa window.GS y window.GM
+    6. accessibility   → escucha eventos DOM
+    7. Módulos ES      → auth-manager, game-logic, main
 -->
 <script src="js/game-state.js"></script>
 <script src="js/theme-system.js"></script>
+<script src="js/gamification.js"></script>
 <script src="js/navigation.js"></script>
 <script src="js/effects-qa.js"></script>
 <script src="js/accessibility.js"></script>

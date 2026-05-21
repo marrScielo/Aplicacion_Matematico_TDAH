@@ -1,23 +1,26 @@
+/**
+ * main.js  (ES module) — v2: eventos de gamificación integrados
+ */
 
 import { loginAutomatico } from './auth-manager.js';
 
-
+/* ── Inicializar tema ── */
 document.addEventListener('DOMContentLoaded', () => {
     window.ThemeManager?.init();
 });
 
-/* ── Eventos al cargar el DOM ───────────────────────── */
+/* ── Eventos al cargar el DOM ── */
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* Volver */
+    /* ── Volver ── */
     document.getElementById('btn-back')
         ?.addEventListener('click', () => window.Navigation?.back());
 
-    /* Devolver piezas */
+    /* ── Devolver piezas ── */
     document.getElementById('btn-reset')
         ?.addEventListener('click', () => window.Effects?.resetLevel());
 
-    /* Comprobar respuesta */
+    /* ── Comprobar respuesta ── */
     document.getElementById('btn-check')
         ?.addEventListener('click', () => {
             if (typeof window.checkLogic === 'function') {
@@ -27,32 +30,69 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-    /* Siguiente pregunta dentro del mismo bloque */
+    /* ── Siguiente pregunta ── */
     document.getElementById('btn-next')
         ?.addEventListener('click', () => {
             window.Effects?.clear();
             window.Navigation?.nextQuestion();
         });
 
-    /* Desde resultado: jugar otro bloque del mismo submenú */
+    /* ── Desde resultado: volver al submenú ── */
     document.getElementById('btn-result-next')
-        ?.addEventListener('click', () => {
-            window.Navigation?.goTo('screen-sub');
-        });
+        ?.addEventListener('click', () => window.Navigation?.goTo('screen-sub'));
 
-    /* Desde resultado: volver al menú principal */
+    /* ── Desde resultado: ir al menú principal ── */
     document.getElementById('btn-result-menu')
-        ?.addEventListener('click', () => {
-            window.Navigation?.goTo('screen-main');
-        });
+        ?.addEventListener('click', () => window.Navigation?.goTo('screen-main'));
 
-    /* ── MODAL DE TEMA ── */
+    /* ── Menú principal: botones de operación ── */
+    document.querySelectorAll('.btn-menu[data-op]').forEach(btn => {
+        btn.addEventListener('click', () => window.Navigation?.showMenu(btn.dataset.op));
+    });
+
+    /* ── Navegación inferior ── */
+    document.querySelectorAll('.bottom-nav-btn[data-screen]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            window.Navigation?.goTo(btn.dataset.screen);
+        });
+    });
+
+    /* ── Avatar en HUD ── */
+    document.getElementById('hud-avatar-btn')
+        ?.addEventListener('click', () => window.Navigation?.goTo('screen-profile'));
+
+    /* ── Botón misiones en HUD ── */
+    document.getElementById('hud-missions-btn')
+        ?.addEventListener('click', () => window.Navigation?.goTo('screen-missions'));
+
+    /* ── Selector de avatar ── */
+    document.querySelectorAll('.avatar-choice-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.avatar;
+            if (id) window.GM?.selectAvatar(id);
+        });
+    });
+
+    /* ── Filtros de tienda ── */
+    document.querySelectorAll('.shop-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.shop-filter-btn')
+                .forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            window.GM?.renderShop(btn.dataset.filter || null);
+        });
+    });
+
+    /* ════════════════════════════════════════════════
+       MODALES
+    ════════════════════════════════════════════════ */
+
+    /* Tema */
     document.getElementById('btn-theme')?.addEventListener('click', () => {
         const modal = document.getElementById('theme-modal');
         if (modal) {
             modal.classList.add('open');
             modal.setAttribute('aria-hidden', 'false');
-            // Marcar el tema activo
             const currentId = window.ThemeManager?.current?.id;
             document.querySelectorAll('.theme-card').forEach(card => {
                 card.classList.toggle('active', card.dataset.theme === currentId);
@@ -68,26 +108,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /* Click en cards de tema */
     document.querySelectorAll('.theme-card').forEach(card => {
         card.addEventListener('click', () => {
             const themeId = card.dataset.theme;
             if (!themeId) return;
-
-            // Feedback visual inmediato: marcar activo
             document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
             card.classList.add('active');
-
-            // Aplicar el tema
             window.ThemeManager?.apply(themeId);
-
-            // Flash de transición
             document.querySelector('.app')?.classList.remove('theme-flash');
             void document.querySelector('.app')?.offsetWidth;
             document.querySelector('.app')?.classList.add('theme-flash');
             setTimeout(() => document.querySelector('.app')?.classList.remove('theme-flash'), 400);
-
-            // Cerrar modal tras breve pausa (para que el niño vea el cambio)
             setTimeout(() => {
                 const modal = document.getElementById('theme-modal');
                 if (modal) {
@@ -98,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    /* Cerrar modales con Escape */
+    /* Escape / click en fondo */
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             document.getElementById('theme-modal')?.classList.remove('open');
@@ -107,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /* Cerrar modales al hacer click en el fondo */
     document.getElementById('theme-modal')?.addEventListener('click', function(e) {
         if (e.target === this) {
             this.classList.remove('open');
@@ -118,27 +148,10 @@ document.addEventListener('DOMContentLoaded', () => {
     /* Sonido global */
     window.Effects?.attachGlobalClickSound?.();
 
-    /* Menú principal — botones de operación */
-    document.querySelectorAll('.btn-menu[data-op]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            window.Navigation?.showMenu(btn.dataset.op);
-        });
-    });
-
-    /* ── Actualizar emojis del menú principal al cambiar tema ── */
+    /* ── Actualizar emojis del menú al cambiar tema ── */
     document.addEventListener('themeChanged', (e) => {
         const theme = e.detail;
-        if (!theme?.db) return;
-
-        // Actualizar los 4 botones del menú principal
-        const opMap = {
-            add: { emoji: theme.db.add.games[0]?.n?.split(' ')[0] || '🌟' },
-            sub: { emoji: theme.db.sub.games[0]?.n?.split(' ')[0] || '☄️' },
-            mul: { emoji: theme.db.mul.games[0]?.n?.split(' ')[0] || '🌀' },
-            div: { emoji: theme.db.div.games[0]?.n?.split(' ')[0] || '🔭' },
-        };
-
-        // Emoji principal por tema para los botones de op
+        if (!theme) return;
         const themeEmojis = {
             space   : { add:'🌟', sub:'☄️',  mul:'🌀', div:'🔭' },
             explorer: { add:'🗺️', sub:'🌊', mul:'🏕️', div:'🔍' },
@@ -147,28 +160,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const emojis = themeEmojis[theme.id] || themeEmojis.space;
 
         document.querySelectorAll('.btn-menu[data-op]').forEach(btn => {
-            const op = btn.dataset.op;
+            const op     = btn.dataset.op;
             const emojiEl = btn.querySelector('.btn-emoji');
             if (emojiEl && emojis[op]) emojiEl.textContent = emojis[op];
         });
 
-        // Actualizar icono score
         const scoreEl = document.querySelector('.top-score');
         if (scoreEl && theme.ui?.scoreLabel) {
             const num = document.getElementById('score')?.textContent || '0';
             scoreEl.innerHTML = `${theme.ui.scoreLabel} <span id="score">${num}</span>`;
         }
+
+        /* Actualizar título de la app */
+        const titleEl = document.querySelector('.top-title');
+        if (titleEl && theme.ui?.appTitle) titleEl.textContent = theme.ui.appTitle;
     });
 });
 
-/* ── Splash screen ──────────────────────────────────── */
+/* ── Splash screen ── */
 window.addEventListener('load', async () => {
     const splash = document.getElementById('splash-screen');
     const bar    = document.querySelector('.loading-bar');
     if (!splash || !bar) return;
 
     let width = 0;
-
     const registroPromesa = loginAutomatico();
 
     const interval = setInterval(async () => {
@@ -180,6 +195,9 @@ window.addEventListener('load', async () => {
 
             const ok = await registroPromesa;
             if (ok) {
+                /* Inicializar gamificación una vez cargado Firebase */
+                window.GM?.init();
+
                 bar.style.width = '100%';
                 clearInterval(interval);
                 setTimeout(() => {

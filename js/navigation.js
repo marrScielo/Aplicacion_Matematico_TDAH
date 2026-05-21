@@ -1,7 +1,13 @@
-
+/**
+ * navigation.js — v2: integra pantallas de gamificación
+ * Maneja: main, sub, game, result, profile, missions, shop
+ */
 
 const Navigation = {
-    screens: ['screen-main', 'screen-sub', 'screen-game', 'screen-result'],
+    screens: [
+        'screen-main', 'screen-sub', 'screen-game', 'screen-result',
+        'screen-profile', 'screen-missions', 'screen-shop'
+    ],
 
     /* ── Cambiar pantalla ─────────────────────────── */
     goTo(id) {
@@ -22,6 +28,16 @@ const Navigation = {
         if (window.AppUX?.setFocusMode) {
             window.AppUX.setFocusMode(id === 'screen-game');
         }
+
+        /* Actualizar nav inferior */
+        document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.screen === id);
+        });
+
+        /* Renderizar pantallas especiales al entrar */
+        if (id === 'screen-profile')  window.GM?.renderProfile?.();
+        if (id === 'screen-missions') window.GM?.renderMissions?.();
+        if (id === 'screen-shop')     window.GM?.renderShop?.();
     },
 
     /* ── Botón "Volver" ───────────────────────────── */
@@ -31,16 +47,18 @@ const Navigation = {
 
         switch (active.id) {
             case 'screen-game':
-                // Si está en medio de un bloque incompleto, avisar
                 if (window.GS.questionsInBlock > 0 && !window.GS.isBlockComplete()) {
                     const ok = confirm('¿Salir? Perderás el progreso de este bloque.');
                     if (!ok) return;
-                    window.GS.questionsInBlock = 0;   // resetear si decide salir
+                    window.GS.questionsInBlock = 0;
                 }
                 this.goTo('screen-sub');
                 break;
             case 'screen-result':
                 this.goTo('screen-sub');
+                break;
+            case 'screen-sub':
+                this.goTo('screen-main');
                 break;
             default:
                 this.goTo('screen-main');
@@ -67,7 +85,6 @@ const Navigation = {
             btn.dataset.gameId = gameId;
 
             if (isDone) {
-                // Juego completado → bloqueado visualmente
                 btn.className = `btn-menu ${d.color} btn-done`;
                 btn.disabled  = true;
                 btn.innerHTML = `
@@ -90,16 +107,10 @@ const Navigation = {
 
     /* ── Lanzar un juego ──────────────────────────── */
     _launchGame(gameId, initFn) {
-        // Guardar en el estado global
         window.GS.startBlock(gameId, initFn);
-
-        // Resetear barra de progreso
         if (window.AppUX?.startBlock) window.AppUX.startBlock();
-
-        // Limpiar área de juego y lanzar
         if (window.Effects?.clear) window.Effects.clear();
         initFn();
-
         this.goTo('screen-game');
     },
 
@@ -117,7 +128,9 @@ const Navigation = {
     showResult() {
         window.GS.markCurrentDone();
 
-        // Actualizar el botón en el submenú si ya está en el DOM
+        /* Guardar progreso en Firebase */
+        window.AuthManager?.saveProgress?.();
+
         const btn = document.querySelector(`[data-game-id="${window.GS.currentGameId}"]`);
         if (btn) {
             btn.classList.add('btn-done');

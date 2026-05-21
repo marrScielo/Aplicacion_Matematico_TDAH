@@ -1,4 +1,12 @@
-
+/* ═══════════════════════════════════════════════════════
+   Academia Espacial Matemática — style.css
+   Optimizado para niños con TDAH:
+   · Colores claros sobre fondo oscuro, sin sobrecargar
+   · Botones grandes con feedback táctil (press-down)
+   · Transiciones suaves (no abruptas)
+   · Barra de progreso siempre visible
+   · Módulos completados visualmente distintos
+═══════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
 
@@ -754,4 +762,28 @@ body.focus-mode .confetti-layer { pointer-events:none; }
     .btn-emoji{ font-size:1.4rem; }
     .game-area{ min-height:65px; padding:8px; }
     .actions-container { margin:6px auto; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ESTILOS ADICIONALES — Pantallas de gamificación
+═══════════════════════════════════════════════════════ */
+
+/* Las nuevas screens usan el mismo sistema .screen/.active */
+#screen-profile,
+#screen-missions,
+#screen-shop {
+    flex          : 1;
+    overflow-y    : auto;
+    padding-bottom: 20px;
+}
+
+/* Ocultar nav inferior durante el juego y resultado */
+#screen-game.active ~ nav.bottom-nav,
+#screen-result.active ~ nav.bottom-nav {
+    display: none;
+}
+
+/* El .app necesita flex-direction:column para la nav inferior */
+.app {
+    position: relative;
 }

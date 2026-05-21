@@ -1,4 +1,11 @@
-
+/* ═══════════════════════════════════════════════════════
+   SISTEMA DE TEMAS — theme-system.css
+   Incluye:
+   · Modal selector de temáticas
+   · Overrides por temática (data-theme="space|explorer|hero")
+   · Animaciones de transición de tema
+   · Adaptaciones TDAH: botones grandes, feedback claro
+═══════════════════════════════════════════════════════ */
 
 /* ── TRANSICIÓN SUAVE AL CAMBIAR TEMA ──────────────── */
 body {

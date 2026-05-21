@@ -1,4 +1,17 @@
-
+/**
+ * theme-system.js
+ * ─────────────────────────────────────────────────────────
+ * Sistema de Personalización de Temáticas Visuales
+ * Diseñado para niños de primaria con TDAH.
+ *
+ * ARQUITECTURA:
+ *  · THEMES: catálogo de 3 temáticas completas
+ *  · ThemeManager: aplica y persiste el tema activo
+ *  · Cada tema define variables CSS + textos + emojis + DB de juegos
+ *
+ * ESCALABLE: Para agregar nuevas temáticas, solo añadir un
+ * nuevo objeto al mapa THEMES con la misma estructura.
+ */
 
 /* ══════════════════════════════════════════════════════════
    CATÁLOGO DE TEMÁTICAS

@@ -313,7 +313,9 @@ function initDragDiv(name, emoji, tClass, icon) {
     };
 }
 
-
+/* ══════════════════════════════════════════════════════════
+   MISIÓN CUMPLIDA — alias de Effects.win + guardar Firebase
+══════════════════════════════════════════════════════════ */
 function misionCumplida(mensaje) {
     // Effects.win registra la respuesta en GS y decide si mostrar resultado
     if (window.Effects?.win) window.Effects.win(mensaje);
