@@ -1,5 +1,8 @@
-// accessibility.js
-// Voz (SpeechSynthesis) + barra de progreso del bloque (5 retos)
+/**
+ * accessibility.js
+ * ─────────────────────────────────────────────────────────
+ * Voz (SpeechSynthesis) + barra de progreso del bloque (5 retos)
+ */
 
 (function () {
     const STORAGE_KEY_AUDIO = 'mathadhd_audio_enabled';
@@ -8,6 +11,28 @@
 
     let audioEnabled = true;
     let blockDone = 0;
+    let preferredVoice = null;
+
+    /* ── 1. CARGAR LAS MEJORES VOCES DISPONIBLES ── */
+    function loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+
+        // Filtrar voces en español
+        const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
+        
+        // Prioridad: Voces de Google (suelen ser en la nube y muy naturales), luego Microsoft Sabina/Helena/Laura
+        preferredVoice = spanishVoices.find(v => v.name.includes('Google')) ||
+                         spanishVoices.find(v => v.name.includes('Sabina') || v.name.includes('Helena') || v.name.includes('Laura')) ||
+                         spanishVoices.find(v => v.name.includes('Natural')) ||
+                         spanishVoices[0]; // Fallback a la primera en español si no encuentra las otras
+    }
+
+    // Los navegadores cargan las voces de forma asíncrona
+    if ('speechSynthesis' in window) {
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
 
     function getBoolFromStorage(key, fallback) {
         try {
@@ -39,10 +64,18 @@
         if (track) track.setAttribute('aria-valuenow', String(done));
     }
 
+    /* ── 2. ELIMINAR EMOJIS DEL TEXTO PARA LA LECTURA ── */
     function htmlToSpeakableText(html) {
         const tmp = document.createElement('div');
         tmp.innerHTML = html || '';
-        const text = (tmp.innerText || tmp.textContent || '').replace(/\\s+/g, ' ').trim();
+        let text = (tmp.innerText || tmp.textContent || '');
+        
+        // Expresión regular moderna para detectar y borrar emojis y símbolos pictográficos
+        text = text.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '');
+        
+        // Limpiar espacios dobles o saltos de línea que dejen los emojis al desaparecer
+        text = text.replace(/\s+/g, ' ').trim();
+        
         return text;
     }
 
@@ -53,6 +86,7 @@
         } catch (_) {}
     }
 
+    /* ── 3. HABLAR CON VOZ NATURAL ── */
     function speak(text) {
         if (!audioEnabled) return;
         if (!text) return;
@@ -61,10 +95,17 @@
         try {
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
+            
+            // Configuración de la voz para que suene menos "robot" y más amigable
             u.lang = 'es-ES';
-            u.rate = 1.0;
-            u.pitch = 1.0;
+            u.rate = 0.95; // Un 5% más lento ayuda a que la dicción sea más clara para los niños
+            u.pitch = 1.1; // Ligeramente más agudo para un tono más amistoso
             u.volume = 1.0;
+            
+            if (preferredVoice) {
+                u.voice = preferredVoice;
+            }
+
             window.speechSynthesis.speak(u);
         } catch (_) {}
     }

@@ -12,8 +12,8 @@
  */
 
 /* ══════════════════════════════════════════════════════════
-   CATÁLOGO DE AVATARES
-══════════════════════════════════════════════════════════ */
+   CATÁLOG══════════════════════════════════════════════════════════O DE AVATARES
+ */
 const AVATARS = {
     space: {
         id    : 'space',
@@ -292,14 +292,13 @@ const GM = {
 
     _completeMission(m) {
         window.GS.coins += m.reward;
-        window.GS.totalPoints += m.reward;
 
         /* Actualizar score visual */
         const scoreEl = document.getElementById('score');
-        if (scoreEl) scoreEl.innerText = window.GS.totalPoints;
+        if (scoreEl) scoreEl.innerText = window.GS.completedBlockCount?.() ?? window.GS.totalBlocks;
 
         this._showMissionComplete(m);
-        this._showToast(`¡Misión completada! +${m.reward}⭐`, m.color);
+        this._showToast(`¡Misión completada! +${m.reward} monedas`, m.color);
         window.Effects?.animateScore?.();
     },
 
@@ -311,7 +310,7 @@ const GM = {
                 <div class="mc-emoji">${m.emoji}</div>
                 <div class="mc-title">¡Misión completada!</div>
                 <div class="mc-name">${m.title}</div>
-                <div class="mc-reward">+${m.reward} ⭐</div>
+                <div class="mc-reward">+${m.reward} monedas</div>
                 <button class="mc-btn" onclick="this.closest('.mission-complete-overlay').remove()">
                     ¡Genial! 🎉
                 </button>
@@ -344,7 +343,7 @@ const GM = {
                     <div class="mission-progress-text">${state.progress||0} / ${m.goal}</div>
                 </div>
                 <div class="mission-reward">
-                    ${done ? '✅' : `+${m.reward}⭐`}
+                    ${done ? '✅' : `+${m.reward} monedas`}
                 </div>`;
             container.appendChild(card);
         });
@@ -472,7 +471,7 @@ const GM = {
     _renderHUD() {
         /* Score principal */
         const scoreEl = document.getElementById('score');
-        if (scoreEl) scoreEl.textContent = window.GS.totalPoints;
+        if (scoreEl) scoreEl.textContent = window.GS.completedBlockCount?.() ?? window.GS.totalBlocks;
 
         /* Estrellas-moneda separadas */
         const coinsHud = document.getElementById('hud-coins');
@@ -514,11 +513,13 @@ const GM = {
 
         if (elName)    elName.textContent    = av.name;
         if (elEmoji)   elEmoji.textContent   = this._getAvatarEmoji();
-        if (elBlocks)  elBlocks.textContent  = window.GS.totalBlocks;
+        const completedBlocks = window.GS.completedBlockCount?.() ?? window.GS.totalBlocks;
+
+        if (elBlocks)  elBlocks.textContent  = completedBlocks;
         if (elCorrect) elCorrect.textContent = window.GS.totalCorrect;
         if (elStreak)  elStreak.textContent  = window.GS.bestStreak;
         if (elCoins)   elCoins.textContent   = window.GS.coins;
-        if (elStars)   elStars.textContent   = window.GS.totalPoints;
+        if (elStars)   elStars.textContent   = completedBlocks;
 
         /* Accesorios equipados */
         const eqContainer = document.getElementById('profile-equipped');

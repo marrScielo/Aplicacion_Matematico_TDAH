@@ -5,6 +5,7 @@
 const Effects = {
     audioCtx : null,
     muted    : false,
+    autoNextTimer: null,
 
     _ctx() {
         if (!this.audioCtx) {
@@ -79,13 +80,18 @@ const Effects = {
     },
 
     _showResultScreen(msg) {
+        window.Navigation?.showResult();
+
         const resultMessage = document.getElementById('result-message');
         const resultScore   = document.getElementById('result-score');
+        const scoreEl       = document.getElementById('score');
         const stars         = document.querySelectorAll('#result-stars span');
+        const completedBlocks = window.GS.completedBlockCount?.() ?? window.GS.totalBlocks;
 
         if (resultMessage) resultMessage.innerText =
             `¡Increíble! ${msg} Completaste las 5 misiones del bloque.`;
-        if (resultScore) resultScore.innerText = window.GS.totalPoints;
+        if (resultScore) resultScore.innerText = completedBlocks;
+        if (scoreEl) scoreEl.innerText = completedBlocks;
 
         stars.forEach(star => {
             star.style.animation = 'none';
@@ -93,18 +99,19 @@ const Effects = {
             star.style.animation = '';
         });
 
-        window.Navigation?.showResult();
     },
 
     win(msg) {
+        if (this.autoNextTimer) {
+            clearTimeout(this.autoNextTimer);
+            this.autoNextTimer = null;
+        }
+
         window.GS.registerCorrectAnswer();
 
         /* Actualizar score */
         const scoreEl = document.getElementById('score');
-        if (scoreEl) scoreEl.innerText = window.GS.totalPoints;
-
-        /* Animación ganancia estrella */
-        window.GM?.showStarGain?.(1);
+        if (scoreEl) scoreEl.innerText = window.GS.completedBlockCount?.() ?? window.GS.totalBlocks;
 
         if (window.AppUX?.onExerciseWin) window.AppUX.onExerciseWin();
 
@@ -118,6 +125,7 @@ const Effects = {
         this.animateScore();
 
         if (window.GS.isBlockComplete()) {
+            window.GM?.showStarGain?.(1);
             this.soundComplete();
             this.celebrateConfetti(true);
             this._setActionButtons('done');
@@ -125,7 +133,12 @@ const Effects = {
         } else {
             this.soundSuccess();
             this.celebrateConfetti(false);
-            this._setActionButtons('next');
+            this._setActionButtons('done');
+            this.autoNextTimer = setTimeout(() => {
+                this.autoNextTimer = null;
+                this._setActionButtons('normal');
+                window.Navigation?.nextQuestion();
+            }, 850);
         }
     },
 
@@ -145,6 +158,10 @@ const Effects = {
     },
 
     clear() {
+        if (this.autoNextTimer) {
+            clearTimeout(this.autoNextTimer);
+            this.autoNextTimer = null;
+        }
         const fb = document.getElementById('game-feedback');
         if (fb) { fb.innerText = ''; fb.className = 'feedback'; }
         this._setActionButtons('normal');

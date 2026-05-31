@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal del Profesor — MathTDAH</title>
+<style>
+  :root {
+    --primary  : #2563EB;
+    --success  : #10B981;
+    --warning  : #F59E0B;
+    --danger   : #EF4444;
+    --purple   : #8B5CF6;
+    --bg       : #F0F4FF;
+    --card     : #fff;
+    --text     : #1e293b;
+    --muted    : #64748b;
+    --radius   : 14px;
+    --shadow   : 0 4px 24px rgba(37,99,235,.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg);
+         color: var(--text); min-height: 100vh; }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 1rem;
+  }
+  .login-card {
+    background: var(--card); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 2.5rem; width: 100%; max-width: 400px;
+  }
+  .login-card h1 { font-size: 1.5rem; margin-bottom: .25rem; color: var(--primary); }
+  .login-card p  { color: var(--muted); margin-bottom: 1.5rem; font-size: .9rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-weight: 600; margin-bottom: .4rem; font-size: .875rem; }
+  .form-group input {
+    width: 100%; padding: .7rem 1rem; border: 2px solid #e2e8f0;
+    border-radius: 10px; font-size: 1rem; outline: none; transition: border .2s;
+  }
+  .form-group input:focus { border-color: var(--primary); }
+  .login-hint {
+    background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
+    padding: .75rem 1rem; margin-bottom: 1rem; font-size: .82rem; color: #1e40af;
+    line-height: 1.5;
+  }
+  .btn-primary {
+    width: 100%; padding: .85rem; background: var(--primary); color: #fff;
+    border: none; border-radius: 10px; font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: opacity .2s;
+  }
+  .btn-primary:hover { opacity: .88; }
+  .error-msg { color: var(--danger); font-size: .875rem; margin-top: .75rem; min-height: 1.2rem; }
+
+  /* ── DASHBOARD ── */
+  #dashboard-screen { display: none; }
+
+  .topbar {
+    background: var(--card); box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    padding: .9rem 1.5rem; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 10;
+  }
+  .topbar-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+  .topbar-right { display: flex; align-items: center; gap: 1rem; }
+  .realtime-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--success);
+    animation: pulse 2s infinite; display: inline-block; margin-right: 4px;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; } 50% { opacity: .4; }
+  }
+  .btn-sm { padding: .4rem .9rem; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; border: none; }
+  .btn-danger  { background: var(--danger); color: #fff; }
+
+  .dash-body { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+
+  .clase-banner {
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    color: #fff; border-radius: var(--radius); padding: 1.25rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+  }
+  .clase-banner h2 { font-size: 1rem; opacity: .85; margin-bottom: .2rem; }
+  .codigo-grande { font-size: 2.4rem; font-weight: 900; letter-spacing: .2em; }
+  .btn-copiar {
+    background: rgba(255,255,255,.2); color: #fff; border: 2px solid rgba(255,255,255,.4);
+    padding: .5rem 1.1rem; border-radius: 8px; cursor: pointer; font-weight: 600;
+    font-size: .9rem; transition: background .2s;
+  }
+  .btn-copiar:hover { background: rgba(255,255,255,.35); }
+
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+                  gap: 1rem; margin-bottom: 1.5rem; }
+  .metric-card {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 1.25rem 1rem; text-align: center; transition: transform .2s;
+  }
+  .metric-card:hover { transform: translateY(-2px); }
+  .metric-icon { font-size: 1.8rem; margin-bottom: .4rem; }
+  .metric-value { font-size: 2rem; font-weight: 800; color: var(--primary); }
+  .metric-label { font-size: .8rem; color: var(--muted); margin-top: .2rem; }
+
+  .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: .75rem; color: var(--text); }
+  .table-wrap { background: var(--card); border-radius: var(--radius);
+                box-shadow: var(--shadow); overflow: hidden; margin-bottom: 1.5rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: .85rem 1rem; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: .9rem; }
+  th { background: #f8fafc; font-weight: 700; color: var(--muted); font-size: .8rem;
+       text-transform: uppercase; letter-spacing: .05em; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fafc; }
+
+  .badge { display: inline-block; padding: .2rem .65rem; border-radius: 99px; font-size: .75rem; font-weight: 700; }
+  .badge-green  { background: #d1fae5; color: #065f46; }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+  .badge-yellow { background: #fef3c7; color: #92400e; }
+  .badge-blue   { background: #dbeafe; color: #1e40af; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+
+  .accuracy-bar { background: #e2e8f0; border-radius: 99px; height: 8px; width: 100px; display:inline-block; vertical-align:middle; }
+  .accuracy-fill { height: 100%; border-radius: 99px; background: var(--success); transition: width .6s; }
+
+  .alerts-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.5rem; }
+  .alert-item {
+    background: var(--card); border-radius: 10px; padding: .85rem 1rem;
+    display: flex; align-items: center; gap: .75rem; border-left: 4px solid;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .alert-warning { border-color: var(--warning); }
+  .alert-danger  { border-color: var(--danger);  }
+  .alert-info    { border-color: var(--primary);  }
+  .alert-success { border-color: var(--success);  }
+  .alert-icon { font-size: 1.2rem; }
+  .alert-text { font-size: .875rem; flex:1; }
+  .alert-text strong { display: block; margin-bottom: .1rem; }
+
+  .tabs { display: flex; gap: .5rem; margin-bottom: 1rem; flex-wrap:wrap; }
+  .tab-btn {
+    padding: .5rem 1rem; border-radius: 8px; border: 2px solid #e2e8f0;
+    background: transparent; cursor: pointer; font-weight: 600; font-size: .875rem;
+    color: var(--muted); transition: all .2s;
+  }
+  .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  .loading { text-align: center; padding: 3rem; color: var(--muted); font-size: .95rem; }
+  .spinner { width: 36px; height: 36px; border: 4px solid #e2e8f0;
+    border-top-color: var(--primary); border-radius: 50%;
+    animation: spin .7s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { text-align: center; padding: 3rem; color: var(--muted); }
+  .empty-icon { font-size: 3rem; margin-bottom: .75rem; }
+
+  /* ── MODAL DETALLE DE ALUMNO ── */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.5);
+    z-index:1000; align-items:center; justify-content:center; padding:1rem;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal-card {
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    width:100%; max-width:680px; max-height:85vh; overflow-y:auto;
+    padding:1.75rem; position:relative;
+  }
+  .modal-close {
+    position:absolute; top:1rem; right:1rem; background:none; border:none;
+    font-size:1.4rem; cursor:pointer; color:var(--muted); line-height:1;
+  }
+  .modal-close:hover { color: var(--danger); }
+  .modal-title { font-size:1.3rem; font-weight:800; margin-bottom:1.5rem; }
+
+  /* Gráfica de barras de errores */
+  .question-bars { display:flex; flex-direction:column; gap:.6rem; margin:1rem 0; }
+  .q-bar-row { display:flex; align-items:center; gap:.75rem; }
+  .q-label { font-size:.82rem; font-weight:600; color:var(--muted); min-width:80px; }
+  .q-bar-wrap { flex:1; background:#f1f5f9; border-radius:99px; height:14px; overflow:hidden; }
+  .q-bar-fill { height:100%; border-radius:99px; transition:width .6s; }
+  .q-stat { font-size:.8rem; color:var(--muted); min-width:80px; text-align:right; }
+
+  /* Radar simple de operaciones */
+  .op-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin:1rem 0; }
+  .op-card {
+    background:#f8fafc; border-radius:12px; padding:.9rem 1rem;
+    border-left:4px solid; display:flex; flex-direction:column; gap:.4rem;
+  }
+  .op-card.strong  { border-color:var(--success); }
+  .op-card.ok      { border-color:var(--warning); }
+  .op-card.weak    { border-color:var(--danger); }
+  .op-name { font-weight:700; font-size:.9rem; }
+  .op-acc  { font-size:1.4rem; font-weight:800; }
+  .op-time { font-size:.78rem; color:var(--muted); }
+
+  /* Estilos para el Switch (Interruptor) */
+  .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px; }
+  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+  input:checked + .slider { background-color: var(--success); }
+  input:checked + .slider:before { transform: translateX(20px); }
+
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h1>🎓 Portal del Profesor</h1>
+    <p>Accede con tu cuenta para supervisar el progreso de tus alumnos.</p>
+
+    <div class="login-hint">
+      💡 <strong>Acceso de prueba:</strong><br>
+      Email: <code>profe@mathtdah.com</code><br>
+      Contraseña: <code>profeContra</code>
+    </div>
+
+    <div class="form-group">
+      <label>Correo electrónico</label>
+      <input type="email" id="input-email" placeholder="profe@mathtdah.com" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="input-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="btn-login">Ingresar al Panel</button>
+    <div class="error-msg" id="login-error"></div>
+  </div>
+</div>
+
+<div id="dashboard-screen">
+  <div class="topbar">
+    <span class="topbar-title">📊 MathTDAH — Panel Docente</span>
+    <div class="topbar-right">
+      <span style="font-size:.82rem;color:var(--muted)">
+        <span class="realtime-dot" title="Actualizando en tiempo real"></span>
+        Tiempo real
+      </span>
+      <span id="topbar-email" style="font-size:.85rem;color:var(--muted)"></span>
+      <button class="btn-sm btn-danger" id="btn-logout">Salir</button>
+    </div>
+  </div>
+
+  <div class="dash-body">
+
+    <div class="clase-banner">
+      <div>
+        <h2>Código de clase para tus alumnos</h2>
+        <div class="codigo-grande" id="codigo-clase">——</div>
+      </div>
+      <button class="btn-copiar" id="btn-copy-code">📋 Copiar</button>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon">👦</div>
+        <div class="metric-value" id="met-alumnos">—</div>
+        <div class="metric-label">Alumnos en clase</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon">✅</div>
+        <div class="metric-value" id="met-correctas">—</div>
+        <div class="metric-label">Respuestas correctas (hoy)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon">🎯</div>
+        <div class="metric-value" id="met-precision">—</div>
+        <div class="metric-label">Precisión promedio</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon">⏱️</div>
+        <div class="metric-value" id="met-minutos">—</div>
+        <div class="metric-label">Minutos jugados (hoy)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon">🔥</div>
+        <div class="metric-value" id="met-racha">—</div>
+        <div class="metric-label">Mejor racha (clase)</div>
+      </div>
+    </div>
+
+    <div id="alertas-section">
+      <div class="section-title">⚠️ Alertas inteligentes</div>
+      <div class="alerts-list" id="alerts-list">
+        <div class="loading"><div class="spinner"></div>Cargando alertas…</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top: 2rem;">🌍 Funciones Generales: Control de Acceso del Salón</div>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem">
+      Usa estos botones para bloquear o habilitar ejercicios a <strong>todos los alumnos de la clase a la vez.</strong>
+    </p>
+    <div id="global-locks-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
+      <div class="loading"><div class="spinner"></div>Cargando controles...</div>
+    </div>
+
+    <div style="text-align: right; margin-top: -1.5rem; margin-bottom: 2.5rem;">
+        <button class="btn-sm btn-danger" onclick="window.eliminarTodosLosAlumnos()" 
+                style="padding: 12px 24px; font-size: 0.9rem; font-weight: 700; background-color: #EF4444; border-radius: 10px; cursor: pointer;">
+            ❌ Vaciar Salón de Clases (Eliminar a todos)
+        </button>
+    </div>
+
+    <div class="section-title">📋 Progreso por alumno
+      <span style="font-size:.8rem;color:var(--muted);font-weight:400;margin-left:.5rem">
+        (clic en una fila para ver detalle)
+      </span>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="todos"    onclick="switchTab('todos')">Todos</button>
+      <button class="tab-btn"        data-tab="activos"  onclick="switchTab('activos')">Activos hoy</button>
+      <button class="tab-btn"        data-tab="alertas"  onclick="switchTab('alertas')">Con alertas</button>
+    </div>
+    <div class="table-wrap">
+      <div class="loading" id="table-loading"><div class="spinner"></div>Cargando alumnos…</div>
+      <table id="alumnos-table" style="display:none">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Alumno</th>
+            <th>Precisión</th>
+            <th>Correctas / Total</th>
+            <th>Bloques</th>
+            <th>Última sesión</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="alumnos-body"></tbody>
+      </table>
+      <div class="empty" id="alumnos-empty" style="display:none">
+        <div class="empty-icon">🧒</div>
+        <div>No hay alumnos en esta vista.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-alumno">
+  <div class="modal-card">
+    <button class="modal-close" onclick="cerrarModal()">✕</button>
+    <div class="modal-title" id="modal-alumno-titulo">Detalle del alumno</div>
+
+    <div class="section-title" style="font-size:.9rem;margin-bottom:.5rem">📊 Rendimiento por operación</div>
+    <div class="op-grid" id="modal-op-grid">
+      <div class="loading" style="padding:1rem;grid-column:1/-1"><div class="spinner"></div></div>
+    </div>
+
+    <div class="section-title" style="font-size:.9rem;margin-top:1.25rem;margin-bottom:.5rem">
+      🔍 Detalle de errores (última sesión)
+    </div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:.75rem">
+      Cada barra muestra cuántos intentos fallidos tuvo el alumno antes de acertar.
+    </p>
+    <div id="modal-error-summary" style="margin-bottom:.75rem;display:flex;gap:.6rem;flex-wrap:wrap"></div>
+    <div class="question-bars" id="modal-q-bars"></div>
+
+    <div id="modal-tiempo-info" style="margin-top:1rem;font-size:.875rem;color:var(--muted);"></div>
+
+    <div class="section-title" style="font-size:.9rem;margin-top:1.5rem;margin-bottom:.5rem">
+      🔒 Control de Acceso a Juegos (Tiempo Real)
+    </div>
+     <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">
+      Usa estos botones para bloquear ejercicios específicos a ESTE alumno.
+     </p>
+    <div id="modal-locks-container"></div>
+
+    <div style="margin-top: 2.5rem; border-top: 2px dashed #e2e8f0; padding-top: 1.5rem; text-align: center;">
+        <button class="btn-primary" id="btn-eliminar-alumno" onclick="window.eliminarAlumnoActivo()"
+                style="background-color: #DC2626; max-width: 320px; font-size: 0.95rem;">
+            ❌ Expulsar Alumno de esta Clase
+        </button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+    getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+    setPersistence, inMemoryPersistence
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+    getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove,
+    collection, query, where, orderBy, limit, Timestamp,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey            : "AIzaSyC2cBewSZrETvRMwUq4TLrTFrcfgsArxn8",
+  authDomain        : "math-tdah-app.firebaseapp.com",
+  projectId         : "math-tdah-app",
+  storageBucket     : "math-tdah-app.firebasestorage.app",
+  messagingSenderId : "123946867099",
+  appId             : "1:123946867099:web:792ca657f32f2e7963293e"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+const TEACHER_EMAIL = "profe@mathtdah.com";
+const TEACHER_PASS  = "profeContra";
+
+let _user      = null;
+let _claseId   = null;
+let _alumnos   = [];
+let _tabActual = "todos";
+let _alumnoActivo = null;  
+let _unsubscribes = [];    
+let _manualLogin = false;   
+let _claseData = null;
+
+const CATS_LABELS = { add: '➕ Suma', sub: '➖ Resta', mul: '✖️ Multiplicación', div: '➗ División' };
+const BLOQUE_LABELS = {
+    'add-0':'Nivel 1', 'add-1':'Nivel 2', 'add-2':'Nivel 3', 'add-3':'Nivel 4',
+    'sub-0':'Nivel 1', 'sub-1':'Nivel 2', 'sub-2':'Nivel 3', 'sub-3':'Nivel 4',
+    'mul-0':'Nivel 1', 'mul-1':'Nivel 2', 'mul-2':'Nivel 3', 'mul-3':'Nivel 4',
+    'div-0':'Nivel 1', 'div-1':'Nivel 2', 'div-2':'Nivel 3', 'div-3':'Nivel 4',
+};
+
+let _alumnoListeners = {};   
+let _alumnoCache     = {};   
+
+await setPersistence(auth, inMemoryPersistence);
+await signOut(auth).catch(() => {});
+
+/* ════ LOGIN ════ */
+document.getElementById('btn-login').addEventListener('click', async () => {
+    const email = document.getElementById('input-email').value.trim();
+    const pass  = document.getElementById('input-pass').value;
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = '';
+
+    if (email !== TEACHER_EMAIL || pass !== TEACHER_PASS) {
+        errEl.textContent = 'Correo o contraseña incorrectos.';
+        return;
+    }
+
+    try {
+        _manualLogin = true;
+        await signInWithEmailAndPassword(auth, email, pass);
+    } catch(e) {
+        _manualLogin = false;
+        const msgs = {
+            'auth/user-not-found'   : 'Correo no registrado.',
+            'auth/wrong-password'   : 'Contraseña incorrecta.',
+            'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+            'auth/invalid-email'    : 'Correo inválido.',
+            'auth/too-many-requests': 'Demasiados intentos. Espera un momento.',
+        };
+        errEl.textContent = msgs[e.code] ?? `Error: ${e.code}`;
+    }
+});
+
+document.getElementById('input-pass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-login').click();
+});
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+    _unsubscribes.forEach(u => u());
+    _unsubscribes = [];
+    Object.values(_alumnoListeners).forEach(({ unsubUser, unsubSesion }) => {
+        unsubUser?.(); unsubSesion?.();
+    });
+    _alumnoListeners = {};
+    _alumnoCache     = {};
+    _manualLogin     = false;
+    await signOut(auth);
+});
+
+/* ════ AUTH STATE ════ */
+onAuthStateChanged(auth, async user => {
+    if (user && !_manualLogin) {
+        await signOut(auth);
+        return;
+    }
+
+    if (user) {
+        _user = user;
+        document.getElementById('login-screen').style.display    = 'none';
+        document.getElementById('dashboard-screen').style.display = 'block';
+        document.getElementById('topbar-email').textContent = user.email;
+        await initDashboard(user);
+    } else {
+        _user = null;
+        document.getElementById('login-screen').style.display    = 'flex';
+        document.getElementById('dashboard-screen').style.display = 'none';
+    }
+});
+
+/* ════ INICIALIZAR DASHBOARD ════ */
+async function initDashboard(user) {
+    const profRef  = doc(db, "profesores", user.uid);
+    let   profSnap = await getDoc(profRef);
+
+    if (!profSnap.exists()) {
+        _claseId = await crearClase(user);
+    } else {
+        _claseId = profSnap.data().claseId ?? await crearClase(user);
+    }
+
+    const claseSnap = await getDoc(doc(db, "clases", _claseId));
+    if (claseSnap.exists()) {
+        document.getElementById('codigo-clase').textContent = claseSnap.data().codigo;
+    }
+
+    const unsubClase = onSnapshot(doc(db, "clases", _claseId), async snap => {
+        if (!snap.exists()) return;
+        _claseData = snap.data();
+        window._renderGlobalLocksUI(); 
+        const uids = _claseData.alumnos ?? [];
+        await cargarAlumnos(uids);
+    });
+    _unsubscribes.push(unsubClase);
+}
+
+/* ════ CREAR CLASE ════ */
+async function crearClase(user) {
+    const codigo  = generarCodigo();
+    const claseRef = doc(collection(db, "clases"));
+    await setDoc(claseRef, {
+        profesorId   : user.uid,
+        profesorEmail: user.email,
+        codigo,
+        alumnos      : [],
+        creadaEn     : Timestamp.now(),
+        lockedGames  : []
+    });
+    await setDoc(doc(db, "profesores", user.uid), {
+        email    : user.email,
+        claseId  : claseRef.id,
+        creadoEn : Timestamp.now(),
+    });
+    return claseRef.id;
+}
+
+function generarCodigo() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let c = '';
+    for (let i = 0; i < 6; i++) c += chars[Math.floor(Math.random() * chars.length)];
+    return c;
+}
+
+document.getElementById('btn-copy-code').addEventListener('click', () => {
+    const c = document.getElementById('codigo-clase').textContent;
+    navigator.clipboard?.writeText(c).then(() => {
+        document.getElementById('btn-copy-code').textContent = '✅ Copiado!';
+        setTimeout(() => document.getElementById('btn-copy-code').textContent = '📋 Copiar', 2000);
+    });
+});
+
+function _reRender() {
+    const lista = Object.values(_alumnoCache);
+    _alumnos = lista;
+    renderMetricas(lista);
+    renderAlertas(lista);
+    renderTabla(lista);
+    if (_alumnoActivo) {
+        const updated = lista.find(a => a.uid === _alumnoActivo.uid);
+        if (updated) {
+            _alumnoActivo = updated;
+            _renderOpGrid(updated);
+            _renderQBars(updated.lastSession, updated);
+            _renderLocksUI(updated);
+        }
+    }
+}
+
+async function cargarAlumnos(uids) {
+    if (!uids || uids.length === 0) {
+        Object.values(_alumnoListeners).forEach(({ unsubUser, unsubSesion }) => {
+            unsubUser?.(); unsubSesion?.();
+        });
+        _alumnoListeners = {}; _alumnoCache = {};
+        renderTabla([]); renderMetricas([]); renderAlertas([]);
+        return;
+    }
+
+    const hoy   = new Date(); hoy.setHours(0,0,0,0);
+    const hoyTs = Timestamp.fromDate(hoy);
+    const nuevoSet = new Set(uids);
+    
+    let seBorroAlguien = false; 
+
+    Object.keys(_alumnoListeners).forEach(uid => {
+        if (!nuevoSet.has(uid)) {
+            _alumnoListeners[uid].unsubUser?.();
+            _alumnoListeners[uid].unsubSesion?.();
+            delete _alumnoListeners[uid]; 
+            delete _alumnoCache[uid];
+            seBorroAlguien = true; 
+        }
+    });
+
+    if (seBorroAlguien) {
+        _reRender();
+    }
+
+    uids.forEach(uid => {
+        if (_alumnoListeners[uid]) return;   
+
+        const unsubUser = onSnapshot(doc(db, "usuarios", uid), snap => {
+            if (!snap.exists()) return;
+            const prev = _alumnoCache[uid] ?? {};
+            _alumnoCache[uid] = { ...prev, uid, ...snap.data() };
+            _reRender();
+        });
+
+        const sesRef = query(
+            collection(db, "sesiones"),
+            where("uid", "==", uid),
+            where("iniciadaEn", ">=", hoyTs),
+            orderBy("iniciadaEn", "desc"),
+            limit(5)
+        );
+        const unsubSesion = onSnapshot(sesRef, sesSnap => {
+            let hoyCorrectas = 0, hoyErradas = 0, hoyMinutos = 0;
+            let ultimaSesion = null, lastSession = null;
+            sesSnap.docs.forEach((d, i) => {
+                const s = d.data();
+                hoyCorrectas += s.totalCorrectas ?? 0;
+                hoyErradas   += s.totalErradas   ?? 0;
+                hoyMinutos   += s.duracionMin     ?? 0;
+                if (i === 0) {
+                    ultimaSesion = s.iniciadaEn?.toDate?.() ?? null;
+                    lastSession  = s;
+                }
+            });
+            const prev = _alumnoCache[uid] ?? { uid };
+            _alumnoCache[uid] = { ...prev, hoyCorrectas, hoyErradas, hoyMinutos, ultimaSesion, lastSession };
+            _reRender();
+        });
+
+        _alumnoListeners[uid] = { unsubUser, unsubSesion };
+    });
+}
+
+/* ════ MÉTRICAS ════ */
+function renderMetricas(alumnos) {
+    const totalCorrectas = alumnos.reduce((s, a) => s + (a.hoyCorrectas ?? 0), 0);
+    const totalMin       = alumnos.reduce((s, a) => s + (a.hoyMinutos  ?? 0), 0);
+    const mejorRacha     = Math.max(0, ...alumnos.map(a => a.bestStreak ?? 0));
+
+    let totalPrec = 0, contPrec = 0;
+    alumnos.forEach(a => {
+        const tot = (a.hoyCorrectas ?? 0) + (a.hoyErradas ?? 0);
+        if (tot > 0) { totalPrec += (a.hoyCorrectas / tot) * 100; contPrec++; }
+    });
+    const precProm = contPrec ? Math.round(totalPrec / contPrec) : 0;
+
+    document.getElementById('met-alumnos').textContent   = alumnos.length;
+    document.getElementById('met-correctas').textContent  = totalCorrectas;
+    document.getElementById('met-precision').textContent  = precProm + '%';
+    document.getElementById('met-minutos').textContent    = totalMin;
+    document.getElementById('met-racha').textContent      = mejorRacha;
+}
+
+/* ════ ALERTAS ════ */
+function renderAlertas(alumnos) {
+    const list = document.getElementById('alerts-list');
+    const alertas = [];
+
+    alumnos.forEach(a => {
+        const nombre = _getNombreAlumno(a);
+        const tot  = (a.hoyCorrectas ?? 0) + (a.hoyErradas ?? 0);
+        const prec = tot > 0 ? (a.hoyCorrectas / tot) : 1;
+
+        if (prec < 0.4 && tot >= 5) {
+            alertas.push({ tipo:'danger', icono:'🆘', titulo:`${nombre} necesita ayuda urgente`, desc:`Precisión del ${Math.round(prec*100)}% hoy (${tot} intentos). Podría estar frustrado.` });
+        } else if (prec < 0.6 && tot >= 5) {
+            alertas.push({ tipo:'warning', icono:'⚠️', titulo:`${nombre} tiene dificultades`, desc:`Precisión del ${Math.round(prec*100)}% hoy. Considera abrirle un bloque anterior.` });
+        }
+        if ((a.hoyMinutos ?? 0) > 45) {
+            alertas.push({ tipo:'warning', icono:'⏰', titulo:`${nombre} lleva mucho tiempo jugando`, desc:`${a.hoyMinutos} minutos. Recomiéndale un descanso.` });
+        }
+        if (prec >= 0.85 && tot >= 5) {
+            alertas.push({ tipo:'success', icono:'🏆', titulo:`¡${nombre} está volando!`, desc:`Precisión del ${Math.round(prec*100)}% hoy. Considera asignarle un bloque más difícil.` });
+        }
+    });
+
+    if (alertas.length === 0) {
+        list.innerHTML = `<div class="alert-item alert-success"><span class="alert-icon">✅</span><div class="alert-text"><strong>¡Todo en orden!</strong> No hay alertas para tus alumnos hoy.</div></div>`;
+        return;
+    }
+
+    list.innerHTML = alertas.map(a => `<div class="alert-item alert-${a.tipo}"><span class="alert-icon">${a.icono}</span><div class="alert-text"><strong>${a.titulo}</strong>${a.desc}</div></div>`).join('');
+}
+
+/* ════ TABLA ════ */
+function renderTabla(alumnos) {
+    document.getElementById('table-loading').style.display  = 'none';
+    document.getElementById('alumnos-table').style.display  = 'table';
+
+    let filtrados = alumnos;
+    if (_tabActual === 'activos') {
+        filtrados = alumnos.filter(a => (a.hoyCorrectas ?? 0) + (a.hoyErradas ?? 0) > 0);
+    } else if (_tabActual === 'alertas') {
+        filtrados = alumnos.filter(a => {
+            const tot  = (a.hoyCorrectas ?? 0) + (a.hoyErradas ?? 0);
+            const prec = tot > 0 ? (a.hoyCorrectas / tot) : 1;
+            return (prec < 0.6 && tot >= 5) || (a.hoyMinutos ?? 0) > 45;
+        });
+    }
+
+    const tbody = document.getElementById('alumnos-body');
+    const empty = document.getElementById('alumnos-empty');
+
+    if (filtrados.length === 0) {
+        tbody.innerHTML = ''; empty.style.display = 'block';
+        document.getElementById('alumnos-table').style.display = 'none';
+        return;
+    }
+    empty.style.display = 'none'; document.getElementById('alumnos-table').style.display = 'table';
+
+    tbody.innerHTML = filtrados.map((a, i) => {
+        const nombre    = _getNombreAlumno(a);
+        const tot       = (a.hoyCorrectas ?? 0) + (a.hoyErradas ?? 0);
+        const prec      = tot > 0 ? Math.round((a.hoyCorrectas / tot) * 100) : 0;
+        const precColor = prec >= 70 ? '#10B981' : prec >= 50 ? '#F59E0B' : '#EF4444';
+        const ultima    = a.ultimaSesion ? a.ultimaSesion.toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit'}) : '—';
+        const estado = tot > 0 ? (prec >= 70 ? '<span class="badge badge-green">✅ Bien</span>' : prec >= 50 ? '<span class="badge badge-yellow">⚠️ Regular</span>' : '<span class="badge badge-red">🆘 Ayuda</span>') : '<span class="badge badge-blue">⏳ Inactivo</span>';
+
+        return `<tr style="cursor:pointer" onclick="window._abrirModal('${a.uid}')">
+          <td>${i+1}</td>
+          <td><strong>${nombre}</strong><br><small style="color:var(--muted)">${a.uid.slice(0,8)}…</small></td>
+          <td><div style="display:flex;align-items:center;gap:.5rem"><div class="accuracy-bar"><div class="accuracy-fill" style="width:${prec}%;background:${precColor}"></div></div><span style="font-weight:700;color:${precColor}">${prec}%</span></div></td>
+          <td>${a.hoyCorrectas ?? 0} / ${tot || 0}</td>
+          <td>${_getCompletedBlocks(a)}</td>
+          <td>${ultima}</td>
+          <td>${estado}</td>
+        </tr>`;
+    }).join('');
+}
+
+/* ════ MODAL DETALLE ════ */
+window._abrirModal = function(uid) {
+    const alumno = _alumnos.find(a => a.uid === uid);
+    if (!alumno) return;
+    _alumnoActivo = alumno;
+    document.getElementById('modal-alumno-titulo').textContent = `📋 ${_getNombreAlumno(alumno)}`;
+    document.getElementById('modal-alumno').classList.add('open');
+
+    _renderOpGrid(alumno);
+    _renderQBars(alumno.lastSession, alumno);
+    _renderLocksUI(alumno);
+};
+
+window.cerrarModal = function() {
+    document.getElementById('modal-alumno').classList.remove('open');
+    _alumnoActivo = null;
+};
+
+document.getElementById('modal-alumno').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModal();
+});
+
+function _renderOpGrid(alumno) {
+    const completadas = alumno.completedGames ?? [];
+    const opCount = { add:0, sub:0, mul:0, div:0 };
+    completadas.forEach(g => {
+        const op = g.split('-')[0];
+        if (opCount[op] !== undefined) opCount[op]++;
+    });
+
+    const tot    = (alumno.hoyCorrectas ?? 0) + (alumno.hoyErradas ?? 0);
+    const prec   = tot > 0 ? Math.round((alumno.hoyCorrectas / tot) * 100) : 0;
+    const avgTime = alumno.lastSession?.avgTimeSecs ?? 0;
+
+    const ops = [
+        { key:'add', label:'➕ Suma',            n: opCount.add },
+        { key:'sub', label:'➖ Resta',           n: opCount.sub },
+        { key:'mul', label:'✖️ Multiplicación',  n: opCount.mul },
+        { key:'div', label:'➗ División',         n: opCount.div },
+    ];
+
+    document.getElementById('modal-op-grid').innerHTML = ops.map(op => {
+        const pct   = Math.min(100, op.n * 25);
+        const level = pct >= 70 ? 'strong' : pct >= 40 ? 'ok' : 'weak';
+        const stars = '⭐'.repeat(op.n);
+        return `<div class="op-card ${level}">
+          <div class="op-name">${op.label}</div>
+          <div class="op-acc">${stars || '0'}</div>
+          <div class="op-time">${op.n} bloques completados</div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('modal-tiempo-info').innerHTML = tot > 0 ? `🎯 Precisión hoy: <strong>${prec}%</strong> &nbsp;|&nbsp; ⏱️ Tiempo promedio por pregunta: <strong>${avgTime.toFixed(1)}s</strong>` : `<em style="color:var(--muted)">Sin actividad hoy.</em>`;
+}
+
+function _renderQBars(sesion, alumno) {
+    const container = document.getElementById('modal-q-bars');
+    const summaryEl = document.getElementById('modal-error-summary');
+    if (!sesion) {
+        container.innerHTML = `<p style="color:var(--muted);font-size:.875rem">Sin datos de sesión disponibles aún.</p>`;
+        summaryEl.innerHTML = ''; return;
+    }
+
+    const attemptsDetail = sesion.attemptsDetail ?? {};
+    const timesDetail    = sesion.timesDetail    ?? {};
+
+    let worstQ = null, worstQErrors = 0;
+    for (let q = 1; q <= 5; q++) {
+        const err = attemptsDetail[q] ?? 0;
+        if (err > worstQErrors) { worstQErrors = err; worstQ = q; }
+    }
+
+    const completadas = alumno?.completedGames ?? [];
+    const errByOp = { add:0, sub:0, mul:0, div:0 };
+    const juegos = sesion.juegosJugados ?? completadas;
+    juegos.forEach(g => {
+        const op = g?.split('-')[0];
+        if (errByOp[op] !== undefined) errByOp[op]++;
+    });
+    const opLabels = { add:'➕ Suma', sub:'➖ Resta', mul:'✖️ Multiplicación', div:'➗ División' };
+    let worstOp = null, worstOpCount = 0;
+    Object.entries(errByOp).forEach(([op, n]) => {
+        if (n > worstOpCount) { worstOpCount = n; worstOp = op; }
+    });
+
+    const chips = [];
+    if (worstQ && worstQErrors > 0) {
+        chips.push(`<span style="background:#FEF3C7;color:#92400E;border-radius:8px;padding:.35rem .7rem;font-size:.8rem;font-weight:700">⚠️ Pregunta más difícil: <strong>Pregunta ${worstQ}</strong> (${worstQErrors} errores)</span>`);
+    } else if (worstQ) {
+        chips.push(`<span style="background:#D1FAE5;color:#065F46;border-radius:8px;padding:.35rem .7rem;font-size:.8rem;font-weight:700">✅ Todas las preguntas correctas al 1er intento</span>`);
+    }
+    if (worstOp) {
+        chips.push(`<span style="background:#EDE9FE;color:#5B21B6;border-radius:8px;padding:.35rem .7rem;font-size:.8rem;font-weight:700">🎯 Operación más practicada: <strong>${opLabels[worstOp]}</strong></span>`);
+    }
+    summaryEl.innerHTML = chips.join('');
+    const html = [];
+
+    for (let q = 1; q <= 5; q++) {
+        const intentos = attemptsDetail[q] ?? 0;
+        const tiempo   = timesDetail[q]    ?? null;
+        const maxBar   = 5;
+        const pct      = Math.min(100, (intentos / maxBar) * 100);
+        const color    = intentos === 0 ? '#10B981' : intentos <= 1  ? '#F59E0B' : '#EF4444';
+        const label    = intentos === 0 ? '✅ Correcto al 1er intento' : `${intentos} errores`;
+        const tiempoStr = tiempo !== null ? ` · ${tiempo.toFixed(1)}s` : '';
+
+        html.push(`<div class="q-bar-row">
+          <div class="q-label">Pregunta ${q}</div>
+          <div class="q-bar-wrap"><div class="q-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+          <div class="q-stat">${label}${tiempoStr}</div>
+        </div>`);
+    }
+    container.innerHTML = html.join('');
+}
+
+function _renderLocksUI(alumno) {
+    const container = document.getElementById('modal-locks-container');
+    const locked = alumno.lockedGames || [];
+    let html = '';
+
+    Object.entries(CATS_LABELS).forEach(([catKey, catName]) => {
+        const catGames = [0, 1, 2, 3].map(i => `${catKey}-${i}`);
+        const allLocked = catGames.every(g => locked.includes(g));
+
+        html += `<div style="background:#f8fafc; padding:12px; border-radius:10px; margin-bottom:12px; border:1px solid #e2e8f0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">
+              <strong style="color:var(--primary); font-size:1rem;">${catName}</strong>
+              <button class="btn-sm ${allLocked ? 'btn-action-primary' : 'btn-danger'}" 
+                      style="font-size: 0.72rem; padding: 0.4rem 0.6rem; white-space: nowrap; flex-shrink: 0; min-width: 105px;"
+                      onclick="window.toggleCategory('${alumno.uid}', '${catKey}', ${!allLocked})">
+                  ${allLocked ? '▶️ Activar Todos' : '⏸️ Pausar Todos'}
+              </button>
+          </div>`;
+
+        catGames.forEach(g => {
+            const isLocked = locked.includes(g);
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0;">
+                  <span style="font-size:0.9rem;">${BLOQUE_LABELS[g]}</span>
+                  <label class="switch">
+                    <input type="checkbox" ${isLocked ? '' : 'checked'} onchange="window.toggleGame('${alumno.uid}', '${g}', !this.checked)">
+                    <span class="slider"></span>
+                  </label>
+              </div>`;
+        });
+        html += `</div>`;
+    });
+    container.innerHTML = html;
+}
+
+window._renderGlobalLocksUI = function() {
+    if (!_claseData) return;
+    const container = document.getElementById('global-locks-container');
+    const locked = _claseData.lockedGames || [];
+    let html = '';
+
+    Object.entries(CATS_LABELS).forEach(([catKey, catName]) => {
+        const catGames = [0, 1, 2, 3].map(i => `${catKey}-${i}`);
+        const allLocked = catGames.every(g => locked.includes(g));
+
+        html += `<div style="background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:2px solid #f1f5f9; padding-bottom:10px;">
+                        <strong style="color:var(--purple); font-size:1.05rem;">${catName}</strong>
+                        <button class="btn-sm ${allLocked ? 'btn-action-primary' : 'btn-danger'}" 
+                                style="font-size: 0.72rem; padding: 0.4rem 0.6rem; white-space: nowrap; flex-shrink: 0; min-width: 105px;"
+                                onclick="window.toggleGlobalCategory('${catKey}', ${!allLocked})">
+                            ${allLocked ? '▶️ Activar' : '⏸️ Pausar'}
+                        </button>
+                     </div>`;
+
+        catGames.forEach(g => {
+            const isLocked = locked.includes(g);
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0;">
+                        <span style="font-size:0.9rem; font-weight:500;">${BLOQUE_LABELS[g]}</span>
+                        <label class="switch">
+                          <input type="checkbox" ${isLocked ? '' : 'checked'} onchange="window.toggleGlobalGame('${g}', !this.checked)">
+                          <span class="slider"></span>
+                        </label>
+                     </div>`;
+        });
+        html += `</div>`;
+    });
+    container.innerHTML = html;
+}
+
+window.toggleGame = async function(uid, gameId, lock) {
+    try {
+        const userRef = doc(db, "usuarios", uid);
+        let currentLocked = [...(_alumnoCache[uid].lockedGames || [])];
+        if (lock && !currentLocked.includes(gameId)) currentLocked.push(gameId);
+        if (!lock) currentLocked = currentLocked.filter(id => id !== gameId);
+        await updateDoc(userRef, { lockedGames: currentLocked });
+    } catch (e) {
+        alert("❌ Error de Firebase al bloquear el juego individual.");
+    }
+};
+
+window.toggleCategory = async function(uid, catKey, lock) {
+    try {
+        const userRef = doc(db, "usuarios", uid);
+        let currentLocked = [...(_alumnoCache[uid].lockedGames || [])];
+        const catGames = [0, 1, 2, 3].map(i => `${catKey}-${i}`);
+        
+        if (lock) {
+            catGames.forEach(g => { if (!currentLocked.includes(g)) currentLocked.push(g); });
+        } else {
+            currentLocked = currentLocked.filter(id => !catGames.includes(id));
+        }
+        await updateDoc(userRef, { lockedGames: currentLocked });
+    } catch (e) {
+        alert("❌ Error de Firebase al bloquear la categoría individual.");
+    }
+};
+
+window.toggleGlobalGame = async function(gameId, lock) {
+    try {
+        const claseRef = doc(db, "clases", _claseId);
+        let currentLocked = [...(_claseData.lockedGames || [])];
+        if (lock && !currentLocked.includes(gameId)) currentLocked.push(gameId);
+        if (!lock) currentLocked = currentLocked.filter(id => id !== gameId);
+        await updateDoc(claseRef, { lockedGames: currentLocked });
+    } catch (error) {
+        alert("❌ Error de Firebase al bloquear juego global.");
+    }
+};
+
+window.toggleGlobalCategory = async function(catKey, lock) {
+    try {
+        const claseRef = doc(db, "clases", _claseId);
+        let currentLocked = [...(_claseData.lockedGames || [])];
+        const catGames = [0, 1, 2, 3].map(i => `${catKey}-${i}`);
+        
+        if (lock) {
+            catGames.forEach(g => { if (!currentLocked.includes(g)) currentLocked.push(g); });
+        } else {
+            currentLocked = currentLocked.filter(id => !catGames.includes(id));
+        }
+        await updateDoc(claseRef, { lockedGames: currentLocked });
+    } catch (error) {
+        alert("❌ Error de Firebase al bloquear categoría global.");
+    }
+};
+
+window.switchTab = function(tab) {
+    _tabActual = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    renderTabla(_alumnos);
+};
+
+function _getNombreAlumno(a) {
+    if (a.nombre && a.nombre.trim()) {
+        return a.apellido ? `${a.nombre} ${a.apellido}` : a.nombre;
+    }
+    return `Alumno ${a.uid.slice(0, 6)}`;
+}
+
+function _getCompletedBlocks(a) {
+    return Array.isArray(a.completedGames) ? a.completedGames.length : (a.totalBlocks ?? 0);
+}
+
+/* ══════════════ LÓGICA PARA ELIMINAR/EXPULSAR ALUMNOS ══════════════ */
+
+window.eliminarAlumnoActivo = async function() {
+    if (!_alumnoActivo) return;
+    
+    const nombreAlumno = _getNombreAlumno(_alumnoActivo);
+    const confirmar = confirm(`¿Estás completamente seguro de expulsar a "${nombreAlumno}" de la clase? El alumno perderá el acceso en tiempo real de forma inmediata.`);
+    if (!confirmar) return;
+
+    try {
+        const alumnoUid = _alumnoActivo.uid;
+        cerrarModal(); 
+
+        const claseRef = doc(db, "clases", _claseId);
+        await updateDoc(claseRef, { alumnos: arrayRemove(alumnoUid) });
+
+        const userRef = doc(db, "usuarios", alumnoUid);
+        await updateDoc(userRef, { claseId: null });
+
+        alert(`✅ ${nombreAlumno} ha sido removido con éxito.`);
+    } catch (e) {
+        alert("❌ Error al intentar expulsar al alumno. Revisa los permisos.");
+        console.error(e);
+    }
+};
+
+window.eliminarTodosLosAlumnos = async function() {
+    if (!_claseData || !_claseData.alumnos || _claseData.alumnos.length === 0) {
+        alert("El salón ya se encuentra vacío o no hay alumnos registrados.");
+        return;
+    }
+
+    const totalAlumnos = _claseData.alumnos.length;
+    const confirmar = confirm(`⚠️ ¡ADVERTENCIA CRÍTICA!\n\n¿Estás seguro de eliminar a los ${totalAlumnos} alumnos de este salón? Se desvinculará a todos en tiempo real y no podrás ver sus datos.`);
+    if (!confirmar) return;
+
+    try {
+        const uids = [..._claseData.alumnos];
+
+        const promesas = uids.map(uid => {
+            const userRef = doc(db, "usuarios", uid);
+            return updateDoc(userRef, { claseId: null });
+        });
+        await Promise.all(promesas);
+
+        const claseRef = doc(db, "clases", _claseId);
+        await updateDoc(claseRef, { alumnos: [] });
+
+        alert("🗑️ ¡Salón vaciado con éxito! Todos los alumnos fueron desvinculados.");
+    } catch (e) {
+        alert("❌ Error al intentar vaciar el salón.");
+        console.error(e);
+    }
+};
+</script>
+</body>
+</html>

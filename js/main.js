@@ -197,6 +197,8 @@ window.addEventListener('load', async () => {
             if (ok) {
                 /* Inicializar gamificación una vez cargado Firebase */
                 window.GM?.init();
+                /* v4: mostrar modal de nombre si el niño no lo ha ingresado */
+                setTimeout(() => window._checkNombreModal?.(), 800);
 
                 bar.style.width = '100%';
                 clearInterval(interval);

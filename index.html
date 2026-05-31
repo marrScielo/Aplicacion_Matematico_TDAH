@@ -13,9 +13,6 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════
-     SPLASH SCREEN
-═══════════════════════════════════════════════════ -->
 <div id="splash-screen" class="splash-overlay">
     <div class="stars-layer" aria-hidden="true">
         <div class="stars stars-sm"></div>
@@ -42,9 +39,6 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
-     APP
-═══════════════════════════════════════════════════ -->
 <div class="app">
 
     <header class="top-bar">
@@ -53,33 +47,22 @@
         </button>
         <span class="top-title">🚀 MathSpace</span>
         <div class="top-actions">
-            <!-- Avatar en HUD -->
             <button class="hud-avatar-btn avatar-display" id="hud-avatar-btn"
                     title="Mi perfil" aria-label="Ver perfil">⭐</button>
-            <!-- Racha -->
             <span class="hud-streak" id="hud-streak" style="display:none"></span>
-            <!-- Misiones -->
             <button class="hud-missions-btn" id="hud-missions-btn"
                     data-no-sound="1" aria-label="Misiones">
                 🎯
                 <span class="hud-missions-badge" id="hud-missions-count">0</span>
             </button>
-            <!-- Tema -->
             <button class="btn-icon" id="btn-theme" data-no-sound="1"
                     aria-label="Cambiar tema" title="Cambiar temática visual">🎨</button>
-            <!-- Config -->
             <button class="btn-icon" id="btn-settings" data-no-sound="1"
                     aria-label="Configuración" title="Configuración de voz">⚙</button>
-            <!-- Score -->
             <span class="top-score" aria-label="Estrellas">⭐ <span id="score">0</span></span>
         </div>
     </header>
 
-    <!-- ═══════════════════════════════════════════════
-         PANTALLAS PRINCIPALES
-    ═══════════════════════════════════════════════ -->
-
-    <!-- ── MENÚ PRINCIPAL ── -->
     <main id="screen-main" class="screen active">
         <h1>Academia Espacial<br>Matemática</h1>
         <div class="grid-2x2">
@@ -102,13 +85,11 @@
         </div>
     </main>
 
-    <!-- ── SUBMENÚ ── -->
     <section id="screen-sub" class="screen">
         <h2 id="sub-title">Elige tu Misión</h2>
         <div class="grid-2x2" id="sub-list"></div>
     </section>
 
-    <!-- ── JUEGO ── -->
     <section id="screen-game" class="screen">
         <div class="block-progress" aria-label="Progreso del bloque">
             <div class="block-progress-track"
@@ -132,7 +113,6 @@
         </div>
     </section>
 
-    <!-- ── RESULTADO ── -->
     <section id="screen-result" class="screen result-screen" aria-live="polite">
         <div class="result-card">
             <div class="result-badge">🚀</div>
@@ -155,11 +135,6 @@
         </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════
-         PANTALLAS DE GAMIFICACIÓN
-    ══════════════════════════════════════════════════ -->
-
-    <!-- ── PERFIL ── -->
     <section id="screen-profile" class="screen">
         <div class="profile-hero">
             <div class="profile-avatar-big avatar-display" id="profile-avatar-big">⭐</div>
@@ -205,7 +180,6 @@
         </div>
     </section>
 
-    <!-- ── MISIONES ── -->
     <section id="screen-missions" class="screen">
         <div class="missions-header">
             <h2>🎯 Mis Misiones</h2>
@@ -214,7 +188,37 @@
         <div id="missions-list"></div>
     </section>
 
-    <!-- ── TIENDA ── -->
+    <section id="screen-clase" class="screen">
+        <div style="padding:1.5rem;max-width:420px;margin:0 auto">
+            <h2 style="font-size:1.3rem;margin-bottom:.5rem">🏫 Unirme a la clase</h2>
+            <p style="color:var(--text-2);margin-bottom:1.5rem;font-size:.9rem">
+                Pídele a tu profe el código de 6 letras y escríbelo aquí.
+            </p>
+            <div id="clase-vinculada-info" style="display:none;
+                 background:var(--success-soft,#d1fae5);border-radius:12px;
+                 padding:1rem;margin-bottom:1rem;color:#065f46;font-weight:600;font-size:.95rem">
+                ✅ ¡Ya estás en la clase de tu profe!
+            </div>
+            <div id="clase-form">
+                <input id="input-codigo-clase"
+                       maxlength="6"
+                       placeholder="ABC123"
+                       style="width:100%;padding:.8rem 1rem;border:2px solid #e2e8f0;
+                              border-radius:12px;font-size:1.3rem;text-align:center;
+                              letter-spacing:.2em;text-transform:uppercase;
+                              outline:none;margin-bottom:.75rem;font-weight:700">
+                <button onclick="window._vincularClase()"
+                        style="width:100%;padding:.85rem;background:var(--primary,#2563EB);
+                               color:#fff;border:none;border-radius:12px;font-size:1rem;
+                               font-weight:700;cursor:pointer">
+                    🔗 Unirme
+                </button>
+                <div id="clase-msg" style="margin-top:.75rem;min-height:1.2rem;
+                     font-size:.875rem;text-align:center"></div>
+            </div>
+        </div>
+    </section>
+
     <section id="screen-shop" class="screen">
         <div class="shop-header">
             <div class="shop-title">🛍️ Tienda</div>
@@ -233,12 +237,8 @@
         <div id="shop-items"></div>
     </section>
 
-    <!-- ═══════════════════════════════════════════════
-         CAPAS GLOBALES
-    ═══════════════════════════════════════════════ -->
     <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
 
-    <!-- ── MODAL CONFIGURACIÓN ── -->
     <div id="settings-modal" class="settings-modal" aria-hidden="true">
         <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
             <div class="settings-title" id="settings-title">⚙ Configuración</div>
@@ -257,7 +257,6 @@
         </div>
     </div>
 
-    <!-- ── MODAL SELECTOR DE TEMA ── -->
     <div id="theme-modal" class="theme-modal" aria-hidden="true">
         <div class="theme-dialog" role="dialog" aria-modal="true" aria-labelledby="theme-modal-title">
             <div class="theme-dialog-title" id="theme-modal-title">🎨 Elige tu temática</div>
@@ -282,7 +281,6 @@
         </div>
     </div>
 
-    <!-- ── MODAL SELECTOR DE AVATAR (primera vez) ── -->
     <div id="avatar-selector-modal" aria-hidden="true">
         <div class="avatar-selector-card" role="dialog" aria-modal="true">
             <div class="avatar-selector-title">¡Elige tu héroe! 🎉</div>
@@ -307,7 +305,6 @@
         </div>
     </div>
 
-    <!-- ── NAVEGACIÓN INFERIOR ── -->
     <nav class="bottom-nav" role="navigation" aria-label="Navegación principal">
         <button class="bottom-nav-btn active" data-screen="screen-main" aria-label="Jugar">
             <span class="nav-icon">🎮</span>
@@ -316,6 +313,10 @@
         <button class="bottom-nav-btn" data-screen="screen-missions" aria-label="Misiones">
             <span class="nav-icon">🎯</span>
             <span>Misiones</span>
+        </button>
+        <button class="bottom-nav-btn" data-screen="screen-clase" aria-label="Mi clase">
+            <span class="nav-icon">🏫</span>
+            <span>Clase</span>
         </button>
         <button class="bottom-nav-btn" data-screen="screen-shop" aria-label="Tienda">
             <span class="nav-icon">🛍️</span>
@@ -327,19 +328,62 @@
         </button>
     </nav>
 
-</div><!-- /.app -->
 
-<!--
-    ORDEN DE CARGA — crítico:
-    1. game-state.js   → window.GS (sin dependencias)
-    2. theme-system.js → THEMES + ThemeManager
-    3. gamification.js → window.GM
-    4. navigation.js   → usa window.GS y window.GM
-    5. effects-qa.js   → usa window.GS y window.GM
-    6. accessibility   → escucha eventos DOM
-    7. Módulos ES      → auth-manager, game-logic, main
--->
-<script src="js/game-state.js"></script>
+    <div id="nombre-modal" style="
+        display:none; position:fixed; inset:0; z-index:9999;
+        background:rgba(0,0,0,.45); align-items:center; justify-content:center;
+        backdrop-filter:blur(6px);">
+        <div style="
+            background:#fff; border-radius:24px; padding:2rem 1.75rem;
+            width:90%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,.2);
+            animation:slideUp .4s cubic-bezier(.34,1.56,.64,1) both;
+            text-align:center;">
+            <div style="font-size:3.5rem;margin-bottom:.5rem">👋</div>
+            <h2 style="font-size:1.4rem;font-weight:800;color:#1e293b;margin-bottom:.25rem">
+                ¡Hola, aventurero!
+            </h2>
+            <p style="color:#64748b;font-size:.9rem;margin-bottom:1.5rem;line-height:1.5">
+                Antes de comenzar, ¿cómo te llamas?
+            </p>
+            <input id="input-nombre" type="text" maxlength="20"
+                placeholder="Tu nombre"
+                autocomplete="given-name"
+                style="width:100%;padding:.85rem 1rem;border:2.5px solid #e2e8f0;
+                       border-radius:14px;font-size:1.1rem;margin-bottom:.75rem;
+                       outline:none;transition:border .2s;font-weight:600;
+                       text-align:center;color:#1e293b;">
+            <input id="input-apellido" type="text" maxlength="20"
+                placeholder="Tu apellido"
+                autocomplete="family-name"
+                style="width:100%;padding:.85rem 1rem;border:2.5px solid #e2e8f0;
+                       border-radius:14px;font-size:1.1rem;margin-bottom:1.25rem;
+                       outline:none;transition:border .2s;font-weight:600;
+                       text-align:center;color:#1e293b;">
+            <button id="btn-guardar-nombre"
+                style="width:100%;padding:1rem;background:linear-gradient(135deg,#2563EB,#7c3aed);
+                       color:#fff;border:none;border-radius:14px;font-size:1.1rem;
+                       font-weight:800;cursor:pointer;letter-spacing:.02em;
+                       box-shadow:0 4px 16px rgba(37,99,235,.35);transition:opacity .2s;">
+                🚀 ¡A jugar!
+            </button>
+            <div id="nombre-error" style="color:#EF4444;font-size:.85rem;margin-top:.75rem;min-height:1rem;"></div>
+        </div>
+    </div>
+    <style>
+        @keyframes slideUp {
+            from { opacity:0; transform:translateY(40px) scale(.95); }
+            to   { opacity:1; transform:translateY(0)   scale(1); }
+        }
+        #input-nombre:focus, #input-apellido:focus {
+            border-color:#2563EB; box-shadow:0 0 0 3px rgba(37,99,235,.15);
+        }
+        .btn-unlocked {
+            opacity: 1 !important;
+            border: 2px dashed #8B5CF6 !important;
+        }
+    </style>
+
+</div><script src="js/game-state.js"></script>
 <script src="js/theme-system.js"></script>
 <script src="js/gamification.js"></script>
 <script src="js/navigation.js"></script>
@@ -348,6 +392,149 @@
 <script type="module" src="js/auth-manager.js"></script>
 <script type="module" src="js/game-logic.js"></script>
 <script type="module" src="js/main.js"></script>
+
+
+<script>
+/* ── Vinculación clase desde index.html ── */
+window._checkClaseStatus = function() {
+    const uid = localStorage.getItem('uid');
+    if (!uid) return;
+    
+    const claseId = localStorage.getItem('claseId_' + uid);
+    if (claseId) {
+        document.getElementById('clase-vinculada-info').style.display = 'block';
+        document.getElementById('clase-form').style.display = 'none';
+    } else {
+        // NUEVO: Si no hay clase (fue expulsado), mostrar el formulario de nuevo
+        document.getElementById('clase-vinculada-info').style.display = 'none';
+        document.getElementById('clase-form').style.display = 'block';
+        document.getElementById('input-codigo-clase').value = ''; 
+        document.getElementById('clase-msg').textContent = ''; 
+    }
+};
+
+// NUEVO: Escuchar el evento de expulsión en tiempo real
+window.addEventListener('claseExpulsada', () => {
+    window._checkClaseStatus();
+    
+    // Si el niño estaba en la pestaña de la clase viendo la pantalla, avisarle con un popup
+    const claseScreen = document.getElementById('screen-clase');
+    if (claseScreen && claseScreen.classList.contains('active')) {
+         window.GM?._showToast?.("El profesor ha cerrado tu sesión en la clase", "#EF4444");
+    }
+});
+
+window._vincularClase = async function() {
+    const input = document.getElementById('input-codigo-clase');
+    const msg   = document.getElementById('clase-msg');
+    const codigo = input.value.trim().toUpperCase();
+    if (codigo.length !== 6) {
+        msg.style.color = '#EF4444';
+        msg.textContent = 'El código debe tener 6 caracteres.';
+        return;
+    }
+    msg.style.color = '#64748b';
+    msg.textContent = '🔄 Conectando…';
+    try {
+        const result = await window.AuthManager?.vincularConProfesor?.(codigo);
+        if (result?.ok) {
+            msg.style.color = '#10B981';
+            msg.textContent = result.msg;
+            const uid = localStorage.getItem('uid');
+            if (uid) localStorage.setItem('claseId_' + uid, 'vinculado');
+            setTimeout(() => {
+                document.getElementById('clase-vinculada-info').style.display = 'block';
+                document.getElementById('clase-form').style.display = 'none';
+            }, 1200);
+        } else {
+            msg.style.color = '#EF4444';
+            msg.textContent = result?.msg ?? 'Error desconocido.';
+        }
+    } catch(e) {
+        msg.style.color = '#EF4444';
+        msg.textContent = 'Error de conexión. Inténtalo de nuevo.';
+    }
+};
+
+/* Uppercase automático en el input */
+document.addEventListener('DOMContentLoaded', () => {
+    const inp = document.getElementById('input-codigo-clase');
+    if (inp) inp.addEventListener('input', () => { inp.value = inp.value.toUpperCase(); });
+});
+</script>
+
+
+<script>
+/* ════════════════════════════════════════════════
+   REGISTRO DE NOMBRE DEL NIÑO (v4)
+════════════════════════════════════════════════ */
+function _mostrarModalNombre() {
+    const modal = document.getElementById('nombre-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => document.getElementById('input-nombre')?.focus(), 200);
+    }
+}
+
+async function _guardarNombre() {
+    const nombre   = document.getElementById('input-nombre').value.trim();
+    const apellido = document.getElementById('input-apellido').value.trim();
+    const errEl    = document.getElementById('nombre-error');
+
+    if (!nombre) {
+        errEl.textContent = 'Por favor escribe tu nombre 😊';
+        document.getElementById('input-nombre').style.borderColor = '#EF4444';
+        return;
+    }
+    errEl.textContent = '';
+
+    const btn = document.getElementById('btn-guardar-nombre');
+    btn.disabled = true;
+    btn.textContent = '⏳ INGRESANDO...';
+
+    const ok = await window.AuthManager?.guardarNombreAlumno?.(nombre, apellido || '');
+
+    if (ok !== false) {
+        /* Cerrar con animación */
+        const modal = document.getElementById('nombre-modal');
+        modal.style.opacity = '0';
+        modal.style.transition = 'opacity .3s';
+        setTimeout(() => { modal.style.display = 'none'; }, 320);
+        /* Mostrar nombre en el HUD si existe el campo */
+        const scoreLabel = document.querySelector('.top-score');
+        if (scoreLabel) {
+            const welcome = document.createElement('span');
+            welcome.style.cssText = 'font-size:.8rem;color:rgba(255,255,255,.8);margin-right:.5rem;font-weight:600;';
+            welcome.textContent = `¡Hola, ${nombre}!`;
+            scoreLabel.parentNode.insertBefore(welcome, scoreLabel);
+            setTimeout(() => welcome.remove(), 5000);
+        }
+    } else {
+        btn.disabled = false;
+        btn.textContent = '🚀 ¡A jugar!';
+        errEl.textContent = 'Error al guardar. Intenta de nuevo.';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btn-guardar-nombre')
+        ?.addEventListener('click', _guardarNombre);
+
+    /* Enter en cualquier campo */
+    ['input-nombre', 'input-apellido'].forEach(id => {
+        document.getElementById(id)?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') _guardarNombre();
+        });
+    });
+});
+
+/* Se llama desde main.js tras el login cuando el niño no tiene nombre */
+window._checkNombreModal = function() {
+    if (!window.AuthManager?.tieneNombre?.()) {
+        _mostrarModalNombre();
+    }
+};
+</script>
 
 </body>
 </html>
